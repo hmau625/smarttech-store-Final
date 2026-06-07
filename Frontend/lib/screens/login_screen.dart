@@ -11,32 +11,59 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final correoController = TextEditingController();
   final passwordController = TextEditingController();
   final authService = AuthService();
 
   bool isLoading = false;
+  bool obscurePassword = true;
+
+  late AnimationController _fadeCtrl;
+  late Animation<double> _fadeAnim;
+
+  static const _accent  = Color(0xFF00D4FF);
+  static const _surface = Color(0xFF0D1F33);
+  static const _card    = Color(0xFF0F2A44);
+  static const _textPri = Color(0xFFEFF6FF);
+  static const _textSec = Color(0xFF7A9BB5);
+  static const _divider = Color(0xFF1A2E44);
+  static const _input   = Color(0xFF162638);
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+    _fadeCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    correoController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   void showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 10),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        duration: const Duration(seconds: 2),
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Row(children: [
+        const Icon(Icons.error_outline, color: Colors.redAccent, size: 16),
+        const SizedBox(width: 8),
+        Expanded(child: Text(message, style: const TextStyle(color: _textPri, fontSize: 13))),
+      ]),
+      backgroundColor: _surface,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.redAccent.withOpacity(0.35)),
       ),
-    );
+      duration: const Duration(seconds: 2),
+    ));
   }
 
   bool isValidEmail(String email) {
@@ -74,9 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => const HomeScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       } else {
         setState(() => isLoading = false);
@@ -88,165 +113,194 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    correoController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
   InputDecoration _inputStyle(String hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white38),
-      prefixIcon: Icon(icon, color: Colors.white70),
+      hintStyle: TextStyle(color: _textSec.withOpacity(0.5), fontSize: 13),
+      prefixIcon: Icon(icon, color: _accent.withOpacity(0.7), size: 20),
       filled: true,
-      fillColor: const Color(0xFF2C3E50),
-      contentPadding: const EdgeInsets.symmetric(vertical: 18),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
+      fillColor: _input,
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: _accent, width: 1.4),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenW = MediaQuery.of(context).size.width;
+    // Responsive: 90% del ancho en móvil, max 420 en desktop
+    final cardWidth = screenW < 500 ? screenW * 0.90 : 420.0;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/login_background.png'),
-            fit: BoxFit.cover,         // ✅ Cubre toda la pantalla sin distorsión
-            alignment: Alignment.center,
+            image: AssetImage('assets/images/fondo_SmarTech.jpeg'),
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
           ),
         ),
         child: Container(
-          // Overlay oscuro sutil para que el card del login resalte mejor
-          color: Colors.black.withOpacity(0.35),
+          color: Colors.black.withOpacity(0.55),
           child: Center(
             child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Container(
-                  width: 350,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F2A44).withOpacity(0.92),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                  child: Container(
+                    width: cardWidth,
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      color: _card.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: _accent.withOpacity(0.10), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.50),
+                          blurRadius: 40,
+                          spreadRadius: 4,
+                          offset: const Offset(0, 10),
+                        ),
+                        BoxShadow(
+                          color: _accent.withOpacity(0.05),
+                          blurRadius: 60,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // ── Logo ──
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: _accent.withOpacity(0.10),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: _accent.withOpacity(0.25)),
+                            boxShadow: [BoxShadow(color: _accent.withOpacity(0.15), blurRadius: 20)],
+                          ),
+                          child: const Icon(Icons.memory, color: _accent, size: 32),
+                        ),
+                        const SizedBox(height: 14),
+                        const Text("SmartTech",
+                            style: TextStyle(color: _textPri, fontWeight: FontWeight.w800,
+                                fontSize: 22, letterSpacing: 1.5)),
+                        const Text("STORE",
+                            style: TextStyle(color: _accent, fontWeight: FontWeight.w600,
+                                fontSize: 10, letterSpacing: 5)),
+                        const SizedBox(height: 6),
+                        Text("Inicia sesión en tu cuenta",
+                            style: TextStyle(color: _textSec.withOpacity(0.7), fontSize: 12)),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            "Iniciar Sesión",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                        const SizedBox(height: 24),
+                        Divider(color: _divider.withOpacity(0.5)),
+                        const SizedBox(height: 20),
+
+                        // ── Email ──
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("Correo Electrónico",
+                              style: TextStyle(color: _textSec, fontSize: 12, fontWeight: FontWeight.w600)),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: correoController,
+                          style: const TextStyle(color: _textPri, fontSize: 14),
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: _inputStyle("tu@email.com", Icons.email_outlined),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ── Password ──
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("Contraseña",
+                              style: TextStyle(color: _textSec, fontSize: 12, fontWeight: FontWeight.w600)),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: passwordController,
+                          obscureText: obscurePassword,
+                          style: const TextStyle(color: _textPri, fontSize: 14),
+                          decoration: _inputStyle("••••••••", Icons.lock_outline).copyWith(
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                color: _textSec, size: 20,
+                              ),
+                              onPressed: () => setState(() => obscurePassword = !obscurePassword),
                             ),
                           ),
-                          Icon(Icons.close, color: Colors.white70),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Correo Electrónico",
-                          style: TextStyle(color: Colors.white70),
                         ),
-                      ),
-                      const SizedBox(height: 8),
 
-                      TextField(
-                        controller: correoController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _inputStyle("tu@email.com", Icons.email),
-                      ),
+                        const SizedBox(height: 28),
 
-                      const SizedBox(height: 15),
-
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Contraseña",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      TextField(
-                        controller: passwordController,
-                        obscureText: true,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _inputStyle("••••••••", Icons.lock),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: login,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1ABCFE),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                        // ── Botón ──
+                        isLoading
+                            ? const SizedBox(
+                                height: 54,
+                                child: Center(child: CircularProgressIndicator(color: _accent, strokeWidth: 2.5)),
+                              )
+                            : GestureDetector(
+                                onTap: login,
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 54,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF00D4FF), Color(0xFF0090B8)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(color: _accent.withOpacity(0.35), blurRadius: 18, offset: const Offset(0, 4)),
+                                    ],
                                   ),
-                                ),
-                                child: const Text(
-                                  "Iniciar Sesión",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                  child: const Center(
+                                    child: Text("Iniciar Sesión",
+                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800,
+                                            fontSize: 15, letterSpacing: 0.5)),
                                   ),
                                 ),
                               ),
+
+                        const SizedBox(height: 20),
+                        Divider(color: _divider.withOpacity(0.5)),
+                        const SizedBox(height: 8),
+
+                        // ── Link registro ──
+                        TextButton(
+                          onPressed: () => Navigator.push(
+                            context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                          child: RichText(
+                            text: TextSpan(
+                              text: "¿No tienes cuenta? ",
+                              style: TextStyle(color: _textSec.withOpacity(0.7), fontSize: 13),
+                              children: const [
+                                TextSpan(
+                                  text: "Regístrate",
+                                  style: TextStyle(color: _accent, fontWeight: FontWeight.w700),
+                                ),
+                              ],
                             ),
-
-                      const SizedBox(height: 15),
-
-                      const Divider(color: Colors.white24),
-
-                      const SizedBox(height: 10),
-
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const RegisterScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "¿No tienes cuenta? Regístrate aquí",
-                          style: TextStyle(
-                            color: Color(0xFF1ABCFE),
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

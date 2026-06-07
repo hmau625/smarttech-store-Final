@@ -7,6 +7,7 @@ from app.models.pedido import Pedido
 from app.models.pedido_detalle import PedidoDetalle
 from app.models.product import Product
 from app.models.user import User
+from app.services.email_service import send_email, build_order_confirmation
 
 import jwt
 
@@ -43,7 +44,7 @@ def checkout(data: dict, db: Session = Depends(get_db)):
     if not metodo:
         raise HTTPException(status_code=400, detail="Método de pago requerido")
 
-    # 🔥 LIMPIAR DATOS (NUEVO)
+    # 🔥 LIMPIAR DATOS
     nombre = (data.get("nombre") or "").strip()
     apellido = (data.get("apellido") or "").strip()
     tipo_documento = data.get("tipo_documento")
@@ -58,7 +59,7 @@ def checkout(data: dict, db: Session = Depends(get_db)):
     referencia_pago = data.get("referencia_pago")
     fecha_entrega = data.get("fecha_entrega")
 
-    # 🔴 VALIDACIONES (NUEVO)
+    # 🔴 VALIDACIONES
     if len(nombre) < 3:
         raise HTTPException(status_code=400, detail="Nombre inválido")
 
@@ -120,27 +121,29 @@ def checkout(data: dict, db: Session = Depends(get_db)):
 
     # 📦 CREAR PEDIDO
     pedido = Pedido(
-    usuario_id=user.id,
-    total=total,
-    metodo_pago=metodo,
-    nombre=nombre,
-    apellido=apellido,
-    tipo_documento=tipo_documento,
-    documento=documento,
-    pais=pais,
-    departamento=departamento,
-    ciudad=ciudad,
-    direccion=direccion,
-    numero_contacto=telefono,
-    referencia_pago=referencia_pago,
-    fecha_entrega=fecha_entrega,
-    estado="pendiente"
-)
+        usuario_id=user.id,
+        total=total,
+        metodo_pago=metodo,
+        nombre=nombre,
+        apellido=apellido,
+        tipo_documento=tipo_documento,
+        documento=documento,
+        pais=pais,
+        departamento=departamento,
+        ciudad=ciudad,
+        direccion=direccion,
+        numero_contacto=telefono,
+        referencia_pago=referencia_pago,
+        fecha_entrega=fecha_entrega,
+        estado="pendiente"
+    )
     db.add(pedido)
     db.commit()
     db.refresh(pedido)
 
     # 📦 CREAR DETALLES
+    email_items = []  # ← para el email
+
     for item, product in productos_validos:
 
         detalle = PedidoDetalle(
@@ -156,11 +159,42 @@ def checkout(data: dict, db: Session = Depends(get_db)):
         if product.stock >= item.quantity:
             product.stock -= item.quantity
 
+        # Guardar para el email
+        email_items.append({
+            "name": product.name,
+            "quantity": item.quantity,
+            "price": float(product.price),
+            "subtotal": float(product.price * item.quantity),
+        })
+
     db.commit()
 
     # 🧹 LIMPIAR CARRITO
     db.query(CartItem).filter(CartItem.user_id == user.id).delete()
     db.commit()
+
+    # 📧 ENVIAR EMAIL DE CONFIRMACIÓN
+    try:
+        direccion_completa = f"{direccion}, {ciudad}, {departamento}, {pais}"
+        fecha_str = str(fecha_entrega).split(" ")[0] if fecha_entrega else "Por confirmar"
+
+        html = build_order_confirmation(
+            nombre=f"{nombre} {apellido}",
+            items=email_items,
+            total=float(total),
+            metodo=metodo,
+            direccion=direccion_completa,
+            fecha_entrega=fecha_str,
+        )
+
+        send_email(
+            to_email=user.correo,
+            subject=f"SmartTech Store — Confirmación de compra #{pedido.id}",
+            html_body=html,
+        )
+    except Exception as e:
+        print(f"ERROR enviando email: {e}")
+        # No falla el checkout si el email falla
 
     return {
         "ok": True,

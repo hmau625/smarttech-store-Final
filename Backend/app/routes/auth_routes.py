@@ -198,3 +198,14 @@ def upload_profile_image(
         "message": "Imagen subida",
         "url": f"http://localhost:8000/{file_path}"
     }
+
+@router.delete("/remove-profile")
+def remove_profile_image(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Borrar la referencia de imagen en la BD
+    current_user.imagen = None
+    db.commit()
+ 
+    return {"message": "Imagen eliminada"}

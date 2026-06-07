@@ -12,7 +12,8 @@ class FavoriteService {
       },
     );
 
-    return res.statusCode == 200;
+    print('>>> POST favorites/$productId → status: ${res.statusCode} | body: ${res.body}');
+    return res.statusCode == 200 || res.statusCode == 201;
   }
 
   Future<bool> removeFavorite(String token, int productId) async {
@@ -23,7 +24,11 @@ class FavoriteService {
       },
     );
 
-    return res.statusCode == 200;
+    // 🔍 TEMPORAL: ver qué responde el servidor exactamente
+    print('>>> DELETE favorites/$productId → status: ${res.statusCode} | body: ${res.body}');
+
+    // Acepta cualquier código 2xx como éxito
+    return res.statusCode >= 200 && res.statusCode < 300;
   }
 
   Future<List<dynamic>> getFavorites(String token) async {
@@ -33,6 +38,8 @@ class FavoriteService {
         "Authorization": "Bearer $token",
       },
     );
+
+    print('>>> GET favorites → status: ${res.statusCode}');
 
     if (res.statusCode == 200) {
       return jsonDecode(res.body);

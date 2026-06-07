@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'dart:typed_data';
-import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 class UserService {
   final String baseUrl = "http://localhost:8000";
@@ -25,7 +24,7 @@ class UserService {
     }
   }
 
-  // ================= DELETE =================
+  // ================= DELETE ACCOUNT =================
   Future<bool> deleteAccount(String token) async {
     final response = await http.delete(
       Uri.parse("$baseUrl/auth/delete"),
@@ -40,38 +39,68 @@ class UserService {
     return response.statusCode == 200;
   }
 
-  // ================= UPLOAD IMAGE (FIX 🔥) =================
-  Future<String?> uploadProfileImage(String token, XFile file) async {
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/auth/upload-profile'),
-    );
+  // ================= UPLOAD PROFILE IMAGE =================
+  Future<String?> uploadProfileImage(
+    String token,
+    Uint8List bytes,
+    String fileName,
+  ) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/auth/upload-profile'),
+      );
 
-    request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Authorization'] = 'Bearer $token';
 
-    // 🔥 IMPORTANTE: usar bytes (funciona en web y PC)
-    Uint8List bytes = await file.readAsBytes();
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: fileName,
+        ),
+      );
 
-    request.files.add(
-      http.MultipartFile.fromBytes(
-        'file',
-        bytes,
-        filename: file.name,
-      ),
-    );
+      var response = await request.send();
 
-    var response = await request.send();
+      print("UPLOAD STATUS: ${response.statusCode}");
 
-    if (response.statusCode == 200) {
-      final respStr = await response.stream.bytesToString();
-      final data = jsonDecode(respStr);
+      if (response.statusCode == 200) {
+        final respStr = await response.stream.bytesToString();
 
-      print("UPLOAD OK: $data");
+        print("UPLOAD BODY: $respStr");
 
-      return data['url'];
-    } else {
-      print("ERROR UPLOAD: ${response.statusCode}");
+        final data = jsonDecode(respStr);
+
+        // 🔥 devuelve la URL de la imagen
+        return data['url'];
+      } else {
+        print("ERROR UPLOAD: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("UPLOAD EXCEPTION: $e");
       return null;
+    }
+  }
+
+  // ================= REMOVE PROFILE IMAGE =================
+  Future<bool> removeProfileImage(String token) async {
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/auth/remove-profile"),
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("REMOVE IMAGE STATUS: ${response.statusCode}");
+      print("REMOVE IMAGE BODY: ${response.body}");
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print("REMOVE IMAGE EXCEPTION: $e");
+      return false;
     }
   }
 }

@@ -28,6 +28,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   static const _textSec = Color(0xFF7A9BB5);
   static const _divider = Color(0xFF1A2E44);
 
+  // 💵 FORMATO PRECIO $1,150,000.00
+  String _fmtPrice(double v) {
+    final parts = v.toStringAsFixed(2).split('.');
+    final intPart = parts[0].replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
+    );
+    return '\$$intPart.${parts[1]}';
+  }
+
   void goNext() {
     Navigator.push(
       context,
@@ -146,7 +156,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(height: 6),
 
                   Text(
-                    "\$${widget.total.toStringAsFixed(2)}",
+                    _fmtPrice(widget.total),
                     style: const TextStyle(
                       color: _accent,
                       fontSize: 26,

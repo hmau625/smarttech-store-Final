@@ -2,13 +2,13 @@ class Product {
   final int? id;
   final String name;
   final double price;
-
   final String? category;
   final String? brand;
   final int? stock;
   final String? image;
-  final Map<String, dynamic>? specs; // 🔥 CAMBIO AQUÍ
+  final Map<String, dynamic>? specs;
 
+  // ✅ CORRECTO - todos los parámetros nombrados dentro de {}
   Product({
     this.id,
     required this.name,
@@ -29,7 +29,9 @@ class Product {
       brand: json["brand"],
       stock: json["stock"],
       image: json["image"],
-      specs: json["specs"], // 🔥 YA NO ES STRING
+      specs: json["specs"] is Map
+          ? Map<String, dynamic>.from(json["specs"])
+          : null, // ✅ cast seguro
     );
   }
 
@@ -41,7 +43,7 @@ class Product {
       "brand": brand,
       "stock": stock,
       "image": image,
-      "specs": specs, // 🔥 ENVÍA COMO JSON
+      "specs": specs,
     };
   }
 }

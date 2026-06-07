@@ -19,771 +19,635 @@ class PaymentDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<PaymentDetailScreen> createState() =>
-      _PaymentDetailScreenState();
+  State<PaymentDetailScreen> createState() => _PaymentDetailScreenState();
 }
 
-class _PaymentDetailScreenState
-    extends State<PaymentDetailScreen> {
+class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
 
-  // 🔹 CONTROLLERS
-  final nombre = TextEditingController();
-  final apellido = TextEditingController();
-  final documento = TextEditingController();
-  final telefono = TextEditingController();
-  final direccion = TextEditingController();
-  final tarjeta = TextEditingController();
-  final cvv = TextEditingController();
-  final otp = TextEditingController();
-  final numeroNequi = TextEditingController();
-
+  final nombre         = TextEditingController();
+  final apellido       = TextEditingController();
+  final documento      = TextEditingController();
+  final telefono       = TextEditingController();
+  final direccion      = TextEditingController();
+  final tarjeta        = TextEditingController();
+  final cvv            = TextEditingController();
+  final numeroNequi    = TextEditingController();
+  final referenciaPago = TextEditingController();
   final countryController = TextEditingController();
-  final stateController = TextEditingController();
-  final cityController = TextEditingController();
+  final stateController   = TextEditingController();
+  final cityController    = TextEditingController();
 
-  // 🔹 VARIABLES
   DateTime? fecha;
-  bool loading = false;
+  bool loading           = false;
   bool aceptaCondiciones = false;
-
   String? tipoDocumento;
-  String? countryValue;
-  String? stateValue;
-  String? cityValue;
-
-  List<String> tiposDocumento = [];
 
   final baseUrl = "http://127.0.0.1:8000";
 
-  // 🎨 UI
-  static const _bg = Color(0xFF060D17);
-  static const _card = Color(0xFF111E2E);
-  static const _accent = Color(0xFF00D4FF);
+  // ── Paleta de colores ────────────────────────────────────────────────────
+  static const _bg      = Color(0xFF060D17);
+  static const _surface = Color(0xFF0D1F33);
+  static const _card    = Color(0xFF111E2E);
+  static const _accent  = Color(0xFF00D4FF);
   static const _textPri = Color(0xFFEFF6FF);
   static const _textSec = Color(0xFF7A9BB5);
+  static const _divider = Color(0xFF1A2E44);
+
+  List<String> get tiposDocumento {
+    if (countryController.text.trim() == "Colombia") return ["CC", "TI", "CE"];
+    if (countryController.text.trim().isEmpty) return [];
+    return ["PAS"];
+  }
 
   @override
   void initState() {
     super.initState();
-
-    countryController.addListener(() {
-      actualizarDocumentos();
-    });
+    countryController.addListener(() => setState(() => tipoDocumento = null));
   }
 
-  // 🔹 DOCUMENTOS
-  void actualizarDocumentos() {
-    if (countryController.text == "Colombia") {
-      tiposDocumento = ["CC", "TI", "CE"];
-    } else {
-      tiposDocumento = ["PAS"];
+  @override
+  void dispose() {
+    for (final c in [nombre, apellido, documento, telefono, direccion,
+                     tarjeta, cvv, numeroNequi, referenciaPago,
+                     countryController, stateController, cityController]) {
+      c.dispose();
     }
-
-    setState(() {
-      tipoDocumento = null;
-    });
+    super.dispose();
   }
 
-  // 🔹 TOKEN
+  String _fmtPrice(double v) {
+    final parts   = v.toStringAsFixed(2).split('.');
+    final intPart = parts[0].replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+    return '\$$intPart.${parts[1]}';
+  }
+
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("token");
   }
 
-  // 🔹 MENSAJES
   void msg(String t, {bool error = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(t),
-        backgroundColor:
-            error ? Colors.red : Colors.green,
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Row(children: [
+        Icon(error ? Icons.error_outline : Icons.check_circle_outline,
+            color: error ? Colors.redAccent : const Color(0xFF4CAF50), size: 16),
+        const SizedBox(width: 8),
+        Expanded(child: Text(t, style: const TextStyle(color: _textPri, fontSize: 13))),
+      ]),
+      backgroundColor: _surface,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: (error ? Colors.redAccent : const Color(0xFF4CAF50)).withOpacity(0.35)),
       ),
-    );
+      duration: const Duration(seconds: 3),
+    ));
   }
 
-  // 🔹 FECHA
   Future<void> pickDate() async {
-    final min =
-        DateTime.now().add(const Duration(days: 7));
-
+    final min = DateTime.now().add(const Duration(days: 7));
     final d = await showDatePicker(
       context: context,
       firstDate: min,
       lastDate: DateTime(2030),
       initialDate: min,
+      builder: (_, child) => Theme(
+        data: ThemeData.dark().copyWith(
+          colorScheme: const ColorScheme.dark(
+            primary: _accent, onPrimary: Colors.black,
+            surface: _card, onSurface: _textPri,
+          ),
+          dialogBackgroundColor: _surface,
+        ),
+        child: child!,
+      ),
     );
-
     if (d != null) setState(() => fecha = d);
   }
 
-  // 🔹 TARJETA FORMATO
-  void formatCard(String v) {
-    String n =
-        v.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (n.length > 16) {
-      n = n.substring(0, 16);
-    }
-
+  void formatCard(String value) {
+    String n = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (n.length > 16) n = n.substring(0, 16);
     String out = "";
-
     for (int i = 0; i < n.length; i++) {
       if (i % 4 == 0 && i != 0) out += "-";
       out += n[i];
     }
-
     tarjeta.value = TextEditingValue(
-      text: out,
-      selection: TextSelection.collapsed(
-        offset: out.length,
-      ),
-    );
+      text: out, selection: TextSelection.collapsed(offset: out.length));
   }
 
-  // 🔥 PAGO
   Future<void> pagar() async {
+    final isCard  = widget.method == "tarjeta";
+    final isNequi = widget.method == "nequi";
+    final isCOD   = widget.method == "contra_entrega";
 
-    countryValue = countryController.text;
-    stateValue = stateController.text;
-    cityValue = cityController.text;
+    if (nombre.text.trim().length < 3)   return msg("Nombre inválido (mín. 3 letras)", error: true);
+    if (apellido.text.trim().length < 3)  return msg("Apellido inválido (mín. 3 letras)", error: true);
+    if (tipoDocumento == null)            return msg("Selecciona el tipo de documento", error: true);
+    if (documento.text.trim().length < 6) return msg("Documento inválido (mín. 6 dígitos)", error: true);
+    if (!RegExp(r'^[0-9]+$').hasMatch(documento.text.trim()))
+      return msg("El documento solo debe tener números", error: true);
+    if (!RegExp(r'^[0-9]{10}$').hasMatch(telefono.text.trim()))
+      return msg("Teléfono inválido (10 dígitos)", error: true);
+    if (countryController.text.trim().isEmpty) return msg("Selecciona el país", error: true);
+    if (cityController.text.trim().isEmpty)    return msg("Selecciona la ciudad", error: true);
+    if (direccion.text.trim().length < 5)      return msg("Dirección inválida", error: true);
+    if (fecha == null)                         return msg("Selecciona fecha de entrega", error: true);
 
-    String telefonoVal = telefono.text.trim();
-
-    // VALIDACIONES
-    if (tipoDocumento == null) {
-      return msg(
-        "Selecciona documento",
-        error: true,
-      );
+    if (isCard) {
+      final card = tarjeta.text.replaceAll("-", "");
+      if (card.length != 16) return msg("Número de tarjeta inválido", error: true);
+      if (cvv.text.length != 3) return msg("CVV inválido (3 dígitos)", error: true);
+      final ref = referenciaPago.text.trim();
+      if (ref.length < 3 || ref.length > 6 || !RegExp(r'^[0-9]+$').hasMatch(ref))
+        return msg("Código de confirmación inválido (3 a 6 dígitos)", error: true);
     }
 
-    if (!RegExp(r'^[0-9]{10}$')
-        .hasMatch(telefonoVal)) {
-      return msg(
-        "Teléfono inválido",
-        error: true,
-      );
+    if (isNequi) {
+      if (!RegExp(r'^[0-9]{10}$').hasMatch(numeroNequi.text.trim()))
+        return msg("Número Nequi inválido (10 dígitos)", error: true);
+      final ref = referenciaPago.text.trim();
+      if (ref.length != 4 || !RegExp(r'^[0-9]+$').hasMatch(ref))
+        return msg("Código Nequi inválido (exactamente 4 dígitos)", error: true);
     }
+
+    if (isCOD && !aceptaCondiciones)
+      return msg("Debes aceptar las condiciones", error: true);
 
     setState(() => loading = true);
 
-    final token = await getToken();
+    try {
+      final token = await getToken();
+      final res = await http.post(
+        Uri.parse("$baseUrl/checkout/"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "token":            token,
+          "metodo_pago":      widget.method,
+          "nombre":           nombre.text.trim(),
+          "apellido":         apellido.text.trim(),
+          "tipo_documento":   tipoDocumento,
+          "documento":        documento.text.trim(),
+          "pais":             countryController.text.trim(),
+          "departamento":     stateController.text.trim(),
+          "ciudad":           cityController.text.trim(),
+          "direccion":        direccion.text.trim(),
+          "fecha_entrega":    fecha.toString(),
+          "numero_contacto":  telefono.text.trim(),
+          "numero_nequi":     numeroNequi.text.trim(),
+          "tarjeta":          tarjeta.text.replaceAll("-", ""),
+          "cvv":              cvv.text.trim(),
+          "referencia_pago":  referenciaPago.text.trim(),
+        }),
+      );
 
-    final res = await http.post(
-      Uri.parse("$baseUrl/checkout/"),
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: jsonEncode({
-        "token": token,
-        "metodo_pago": widget.method,
-        "nombre": nombre.text,
-        "apellido": apellido.text,
-        "tipo_documento": tipoDocumento,
-        "documento": documento.text,
-        "pais": countryValue,
-        "departamento": stateValue,
-        "ciudad": cityValue,
-        "direccion": direccion.text,
-        "fecha_entrega": fecha.toString(),
-        "referencia_pago": otp.text,
-        "numero_contacto": telefonoVal
-      }),
-    );
+      setState(() => loading = false);
 
-    setState(() => loading = false);
-
-    if (res.statusCode == 200) {
-      Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => SuccessScreen(
-      token: widget.token,
-    ),
-  ),
-);
-    } else {
-      msg(res.body, error: true);
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        msg("¡Compra realizada con éxito!");
+        Navigator.push(context, MaterialPageRoute(
+          builder: (_) => SuccessScreen(token: widget.token),
+        ));
+      } else {
+        try {
+          final data = jsonDecode(res.body);
+          msg(data["detail"] ?? "Error en el checkout", error: true);
+        } catch (_) {
+          msg("Error en el checkout", error: true);
+        }
+      }
+    } catch (e) {
+      setState(() => loading = false);
+      msg("Error de conexión", error: true);
     }
   }
 
-  // 🔹 INPUT UI
-  Widget input(
-    String label,
-    TextEditingController c,
-    IconData icon, {
+  // ════════════════ WIDGETS ════════════════
+
+  Widget _input(String label, TextEditingController c, IconData icon, {
     TextInputType type = TextInputType.text,
     List<TextInputFormatter>? formatters,
     Function(String)? onChanged,
+    int maxLines = 1,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
-        controller: c,
-        keyboardType: type,
-        inputFormatters: formatters,
-        onChanged: onChanged,
-        style: const TextStyle(
-          color: _textPri,
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-        ),
+        controller: c, keyboardType: type,
+        inputFormatters: formatters, onChanged: onChanged, maxLines: maxLines,
+        style: const TextStyle(color: _textPri, fontSize: 14, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(
-            vertical: 18,
-            horizontal: 16,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: _accent,
-            size: 22,
-          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          prefixIcon: Icon(icon, color: _accent, size: 20),
           labelText: label,
-          labelStyle: const TextStyle(
-            color: _textSec,
-            fontWeight: FontWeight.w500,
-          ),
-          filled: true,
-          fillColor: const Color(0xFF162638),
+          labelStyle: const TextStyle(color: _textSec, fontSize: 13),
+          filled: true, fillColor: const Color(0xFF162638),
           enabledBorder: OutlineInputBorder(
-            borderRadius:
-                BorderRadius.circular(18),
-            borderSide: BorderSide(
-              color:
-                  Colors.white.withOpacity(0.05),
-            ),
-          ),
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.05))),
           focusedBorder: OutlineInputBorder(
-            borderRadius:
-                BorderRadius.circular(18),
-            borderSide: const BorderSide(
-              color: _accent,
-              width: 1.4,
-            ),
-          ),
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: _accent, width: 1.4)),
         ),
       ),
     );
   }
 
-  // 🔹 SECTION UI
-  Widget section(String title, Widget child) {
+  Widget _section(String title, IconData icon, Widget child) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 22),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: _card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color:
-              Colors.white.withOpacity(0.04),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color:
-                Colors.black.withOpacity(0.25),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: _card, borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _divider),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.20), blurRadius: 14, offset: const Offset(0, 6))],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          Text(
-            title,
-            style: const TextStyle(
-              color: _accent,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+          Row(children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _accent.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+              child: Icon(icon, color: _accent, size: 18),
             ),
-          ),
-
-          const SizedBox(height: 20),
-
+            const SizedBox(width: 10),
+            Text(title, style: const TextStyle(
+                color: _textPri, fontSize: 15, fontWeight: FontWeight.w700)),
+          ]),
+          const SizedBox(height: 18),
           child,
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bg,
-
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: _bg,
-        centerTitle: true,
-        iconTheme:
-            const IconThemeData(color: Colors.white),
-        title: Text(
-          "Pago ${widget.method}",
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            letterSpacing: 0.5,
+  // ── Location Picker con texto completamente blanco en el diálogo ─────────
+  Widget _locationPicker() {
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        // Texto general en todo el widget y diálogos
+        textTheme: ThemeData.dark().textTheme.apply(
+          bodyColor: _textPri,
+          displayColor: _textPri,
+        ),
+        // Estilo de los ListTile dentro del diálogo (cada país/estado/ciudad)
+        listTileTheme: const ListTileThemeData(
+          textColor: Color(0xFFEFF6FF),
+          titleTextStyle: TextStyle(
+            color: Color(0xFFEFF6FF),
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
+          iconColor: Color(0xFF00D4FF),
+        ),
+        // Tema del diálogo — fuerza texto blanco en título y contenido
+        dialogTheme: DialogThemeData(
+          backgroundColor: _card,
+          titleTextStyle: const TextStyle(
+            color: _textPri,
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+          ),
+          contentTextStyle: const TextStyle(
+            color: Color(0xFFEFF6FF),
+            fontSize: 15,
           ),
         ),
+        dialogBackgroundColor: _card,
+        primaryColor: _accent,
+        // Barra de búsqueda dentro del diálogo
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF0A1929),
+          hintStyle: TextStyle(color: _textSec.withOpacity(0.6), fontSize: 13),
+          prefixIconColor: _textSec,
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: _accent.withOpacity(0.40))),
+          focusedBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: _accent, width: 1.5)),
+        ),
+        // ColorScheme completo: onSurface y onBackground son los que
+        // Flutter usa para pintar el texto sobre fondos oscuros
+        colorScheme: const ColorScheme.dark(
+          primary: _accent,
+          onPrimary: Colors.black,
+          surface: _card,
+          onSurface: Color(0xFFEFF6FF),       // ← texto sobre superficie (lista)
+          secondary: _accent,
+          onSecondary: Colors.black,
+          background: _card,
+          onBackground: Color(0xFFEFF6FF),    // ← texto sobre fondo del diálogo
+        ),
+        // Botón "Close" del diálogo
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: _accent),
+        ),
       ),
+      child: CountryStateCityPicker(
+        country: countryController,
+        state: stateController,
+        city: cityController,
+        dialogColor: _card,
+        textFieldDecoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF162638),
+          labelStyle: const TextStyle(color: _textSec, fontSize: 13),
+          suffixIcon: const Icon(Icons.arrow_drop_down, color: _accent),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.05))),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: _accent, width: 1.4)),
+        ),
+      ),
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    final isCard  = widget.method == "tarjeta";
+    final isNequi = widget.method == "nequi";
+    final isCOD   = widget.method == "contra_entrega";
+    final paisSeleccionado = countryController.text.trim().isNotEmpty;
+
+    return Scaffold(
+      backgroundColor: _bg,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: _surface,
+        leading: const BackButton(color: _accent),
+        centerTitle: true,
+        title: Text(
+          isCard ? "Pago con tarjeta" : isNequi ? "Pago con Nequi" : "Contra entrega",
+          style: const TextStyle(color: _textPri, fontWeight: FontWeight.w800, fontSize: 18)),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: _divider)),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-
         child: Column(
           children: [
 
-            // 👤 DATOS
-            section(
-              "Información personal",
-
-              Column(
-                children: [
-
-                  input(
-                    "Nombre",
-                    nombre,
-                    Icons.person,
-                  ),
-
-                  input(
-                    "Apellido",
-                    apellido,
-                    Icons.person_outline,
-                  ),
-
-                  DropdownButtonFormField<String>(
-                    value: tipoDocumento,
-                    dropdownColor: _card,
-                    iconEnabledColor: _accent,
-
-                    style: const TextStyle(
-                      color: _textPri,
-                    ),
-
-                    decoration: InputDecoration(
-                      contentPadding:
-                          const EdgeInsets.symmetric(
-                        vertical: 18,
-                        horizontal: 16,
-                      ),
-
-                      labelText:
-                          "Tipo de documento",
-
-                      labelStyle:
-                          const TextStyle(
-                        color: _textSec,
-                        fontWeight:
-                            FontWeight.w500,
-                      ),
-
-                      filled: true,
-
-                      fillColor:
-                          const Color(0xFF162638),
-
-                      enabledBorder:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(
-                                18),
-                        borderSide: BorderSide(
-                          color: Colors.white
-                              .withOpacity(0.05),
-                        ),
-                      ),
-
-                      focusedBorder:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(
-                                18),
-                        borderSide:
-                            const BorderSide(
-                          color: _accent,
-                          width: 1.4,
-                        ),
-                      ),
-                    ),
-
-                    items: tiposDocumento
-                        .map(
-                          (doc) =>
-                              DropdownMenuItem(
-                            value: doc,
-                            child: Text(
-                              doc,
-                              style:
-                                  const TextStyle(
-                                color:
-                                    Colors.white,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-
-                    onChanged: (v) =>
-                        setState(
-                      () =>
-                          tipoDocumento = v,
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  input(
-                    "Número documento",
-                    documento,
-                    Icons.badge,
-                    type:
-                        TextInputType.number,
-                  ),
-
-                  input(
-                    "Teléfono",
-                    telefono,
-                    Icons.phone,
-                    type:
-                        TextInputType.phone,
-                    formatters: [
-                      FilteringTextInputFormatter
-                          .digitsOnly,
-                      LengthLimitingTextInputFormatter(
-                          10),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // 🌍 UBICACIÓN
-section(
-  "Dirección de entrega",
-
-  Column(
-    children: [
-
-      Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: const Color(0xFF162638),
-
-          hintColor: _textSec,
-
-          textTheme: const TextTheme(
-
-            bodyLarge: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-
-            bodyMedium: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
-          ),
-
-          inputDecorationTheme: InputDecorationTheme(
-            labelStyle: const TextStyle(
-              color: _textSec,
-            ),
-
-            filled: true,
-            fillColor: const Color(0xFF162638),
-
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: Colors.white.withOpacity(0.05),
-              ),
-            ),
-
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: const BorderSide(
-                color: _accent,
-                width: 1.4,
-              ),
-            ),
-          ),
-        ),
-
-        child: Container(
-          width: double.infinity,
-
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 4,
-          ),
-
-          margin: const EdgeInsets.only(bottom: 18),
-
-          decoration: BoxDecoration(
-            color: const Color(0xFF162638),
-
-            borderRadius: BorderRadius.circular(18),
-
-            border: Border.all(
-              color: Colors.white.withOpacity(0.05),
-            ),
-          ),
-
-          child: Theme(
-            data: Theme.of(context).copyWith(
-
-              textTheme: const TextTheme(
-
-                bodyLarge: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-
-                bodyMedium: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
-              ),
-
-              hintColor: _textSec,
-            ),
-
-            child: CountryStateCityPicker(
-              country: countryController,
-              state: stateController,
-              city: cityController,
-            ),
-          ),
-        ),
-      ),
-
-      const SizedBox(height: 18),
-
-      input(
-        "Dirección",
-        direccion,
-        Icons.home,
-      ),
-
-      SizedBox(
-        width: double.infinity,
-
-        child: ElevatedButton.icon(
-          onPressed: pickDate,
-
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _accent,
-            foregroundColor: Colors.black,
-
-            padding: const EdgeInsets.symmetric(
-              vertical: 16,
-            ),
-
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-
-          icon: const Icon(Icons.calendar_month),
-
-          label: Text(
-            fecha == null
-                ? "Seleccionar fecha"
-                : fecha.toString().split(" ")[0],
-
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    ],
-  ),
-),
-            // 💳 PAGO
-            section(
-              "Método de pago",
-
-              Column(
-                children: [
-
-                  if (widget.method ==
-                      "tarjeta")
-                    input(
-                      "XXXX-XXXX-XXXX-XXXX",
-                      tarjeta,
-                      Icons.credit_card,
-                      type:
-                          TextInputType.number,
-                      onChanged: formatCard,
-                    ),
-
-                  if (widget.method ==
-                      "tarjeta")
-                    input(
-                      "CVV",
-                      cvv,
-                      Icons.lock,
-                      type:
-                          TextInputType.number,
-                      formatters: [
-                        FilteringTextInputFormatter
-                            .digitsOnly,
-                        LengthLimitingTextInputFormatter(
-                            3),
-                      ],
-                    ),
-
-                  if (widget.method ==
-                      "nequi")
-                    input(
-                      "Número Nequi",
-                      numeroNequi,
-                      Icons.phone_android,
-                      type:
-                          TextInputType.phone,
-                    ),
-
-                  input(
-                    "OTP",
-                    otp,
-                    Icons.lock_outline,
-                    type:
-                        TextInputType.number,
-                    formatters: [
-                      FilteringTextInputFormatter
-                          .digitsOnly,
-                      LengthLimitingTextInputFormatter(
-                          6),
-                    ],
-                  ),
-
-                  if (widget.method ==
-                      "contra_entrega")
-                    Theme(
-                      data: Theme.of(context)
-                          .copyWith(
-                        unselectedWidgetColor:
-                            Colors.white,
-                      ),
-                      child: CheckboxListTile(
-                        value:
-                            aceptaCondiciones,
-
-                        activeColor: _accent,
-
-                        onChanged: (v) =>
-                            setState(
-                          () =>
-                              aceptaCondiciones =
-                                  v!,
-                        ),
-
-                        title: const Text(
-                          "Aceptar condiciones",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight:
-                                FontWeight.w500,
-                          ),
-                        ),
-
-                        controlAffinity:
-                            ListTileControlAffinity
-                                .leading,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // 💰 TOTAL
-            section(
-              "Resumen",
-
-              Row(
-                mainAxisAlignment:
-                    MainAxisAlignment
-                        .spaceBetween,
-
-                children: [
-
-                  const Text(
-                    "Total",
-                    style: TextStyle(
-                      color: _textSec,
-                      fontSize: 16,
-                    ),
-                  ),
-
-                  Text(
-                    "\$${widget.total}",
-                    style: const TextStyle(
-                      color: _accent,
-                      fontSize: 24,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // 🔥 BOTÓN
-            SizedBox(
+            // ── Total ──
+            Container(
               width: double.infinity,
-              height: 58,
-
-              child: ElevatedButton(
-                onPressed:
-                    loading ? null : pagar,
-
-                style:
-                    ElevatedButton.styleFrom(
-                  backgroundColor: _accent,
-                  elevation: 8,
-                  shadowColor:
-                      _accent.withOpacity(0.4),
-
-                  shape:
-                      RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(
-                            18),
-                  ),
-                ),
-
-                child: loading
-                    ? const CircularProgressIndicator(
-                        color: Colors.black,
-                      )
-                    : const Text(
-                        "Confirmar pedido",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight:
-                              FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+              padding: const EdgeInsets.all(18),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: _accent.withOpacity(0.07),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _accent.withOpacity(0.30)),
               ),
+              child: Row(children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _accent.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.receipt_outlined, color: _accent, size: 22),
+                ),
+                const SizedBox(width: 14),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text("Total a pagar", style: TextStyle(color: _textSec, fontSize: 12)),
+                  Text(_fmtPrice(widget.total),
+                      style: const TextStyle(color: _accent, fontSize: 26, fontWeight: FontWeight.w800)),
+                ]),
+              ]),
             ),
 
-            const SizedBox(height: 25),
+            // ── Datos personales ──
+            _section("Datos personales", Icons.person_outline, Column(
+              children: [
+                _input("Nombre", nombre, Icons.person_outline),
+                _input("Apellido", apellido, Icons.person),
+                _input("Teléfono de contacto", telefono, Icons.phone_outlined,
+                    type: TextInputType.phone,
+                    formatters: [FilteringTextInputFormatter.digitsOnly,
+                                 LengthLimitingTextInputFormatter(10)]),
+              ],
+            )),
+
+            // ── Dirección ──
+            _section("Dirección de entrega", Icons.location_on_outlined, Column(
+              children: [
+                _locationPicker(),
+                const SizedBox(height: 14),
+
+                // Documento — aparece solo cuando hay país seleccionado
+                if (!paisSeleccionado)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 14),
+                    decoration: BoxDecoration(
+                      color: _accent.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _accent.withOpacity(0.20)),
+                    ),
+                    child: Row(children: const [
+                      Icon(Icons.info_outline, color: _textSec, size: 15),
+                      SizedBox(width: 8),
+                      Text("Selecciona el país para ver los tipos de documento",
+                          style: TextStyle(color: _textSec, fontSize: 12)),
+                    ]),
+                  )
+                else ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: DropdownButtonFormField<String>(
+                      value: tipoDocumento,
+                      dropdownColor: _card,
+                      iconEnabledColor: _accent,
+                      style: const TextStyle(color: _textPri, fontSize: 14),
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                        labelText: "Tipo de documento",
+                        prefixIcon: const Icon(Icons.badge_outlined, color: _accent, size: 20),
+                        labelStyle: const TextStyle(color: _textSec, fontSize: 13),
+                        filled: true, fillColor: const Color(0xFF162638),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: Colors.white.withOpacity(0.05))),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: _accent, width: 1.4)),
+                      ),
+                      items: tiposDocumento.map((e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e, style: const TextStyle(color: _textPri)),
+                      )).toList(),
+                      onChanged: (v) => setState(() => tipoDocumento = v),
+                    ),
+                  ),
+                  _input("Número de documento", documento, Icons.badge_outlined,
+                      type: TextInputType.number,
+                      formatters: [FilteringTextInputFormatter.digitsOnly,
+                                   LengthLimitingTextInputFormatter(12)]),
+                ],
+
+                _input("Dirección exacta", direccion, Icons.home_outlined, maxLines: 2),
+
+                // ── Fecha de entrega ──
+                GestureDetector(
+                  onTap: pickDate,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    margin: const EdgeInsets.only(top: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF162638),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: fecha != null ? _accent.withOpacity(0.50) : Colors.white.withOpacity(0.05))),
+                    child: Row(children: [
+                      Icon(Icons.calendar_today_outlined,
+                          color: fecha != null ? _accent : _textSec, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        fecha != null
+                            ? "Entrega: ${fecha!.day}/${fecha!.month}/${fecha!.year}"
+                            : "Seleccionar fecha de entrega",
+                        style: TextStyle(
+                          color: fecha != null ? _textPri : _textSec, fontSize: 14,
+                          fontWeight: fecha != null ? FontWeight.w600 : FontWeight.normal)),
+                      const Spacer(),
+                      Icon(Icons.chevron_right_rounded,
+                          color: fecha != null ? _accent : _textSec, size: 18),
+                    ]),
+                  ),
+                ),
+              ],
+            )),
+
+            // ── Tarjeta ──
+            if (isCard)
+              _section("Datos de tarjeta", Icons.credit_card_outlined, Column(children: [
+                _input("Número de tarjeta", tarjeta, Icons.credit_card,
+                    type: TextInputType.number, onChanged: formatCard),
+                _input("CVV (3 dígitos)", cvv, Icons.lock_outline,
+                    type: TextInputType.number,
+                    formatters: [FilteringTextInputFormatter.digitsOnly,
+                                 LengthLimitingTextInputFormatter(3)]),
+                _input("Código de confirmación (3–6 dígitos)", referenciaPago,
+                    Icons.pin_outlined,
+                    type: TextInputType.number,
+                    formatters: [FilteringTextInputFormatter.digitsOnly,
+                                 LengthLimitingTextInputFormatter(6)]),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _accent.withOpacity(0.05), borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _accent.withOpacity(0.20))),
+                  child: const Row(children: [
+                    Icon(Icons.info_outline, color: _textSec, size: 14),
+                    SizedBox(width: 8),
+                    Expanded(child: Text(
+                      "El código de confirmación es enviado por tu banco al aprobar el pago",
+                      style: TextStyle(color: _textSec, fontSize: 11))),
+                  ]),
+                ),
+              ])),
+
+            // ── Nequi ──
+            if (isNequi)
+              _section("Datos Nequi", Icons.phone_android_outlined, Column(children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6C2DC7).withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF6C2DC7).withOpacity(0.30))),
+                  child: const Row(children: [
+                    Icon(Icons.info_outline, color: Color(0xFF9B59B6), size: 16),
+                    SizedBox(width: 8),
+                    Expanded(child: Text(
+                      "Ingresa tu número Nequi y el código de 4 dígitos que te llegará",
+                      style: TextStyle(color: Color(0xFF9B59B6), fontSize: 12))),
+                  ]),
+                ),
+                _input("Número Nequi (10 dígitos)", numeroNequi, Icons.phone_android,
+                    type: TextInputType.phone,
+                    formatters: [FilteringTextInputFormatter.digitsOnly,
+                                 LengthLimitingTextInputFormatter(10)]),
+                _input("Código de confirmación (4 dígitos)", referenciaPago,
+                    Icons.pin_outlined,
+                    type: TextInputType.number,
+                    formatters: [FilteringTextInputFormatter.digitsOnly,
+                                 LengthLimitingTextInputFormatter(4)]),
+              ])),
+
+            // ── Contra entrega ──
+            if (isCOD)
+              _section("Contra entrega", Icons.local_shipping_outlined, Column(children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFCA28).withOpacity(0.07),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFFCA28).withOpacity(0.30))),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+                    Text("Condiciones:", style: TextStyle(color: Color(0xFFFFCA28), fontWeight: FontWeight.w700, fontSize: 13)),
+                    SizedBox(height: 8),
+                    Text("• Pago en efectivo al recibir el producto",      style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                    Text("• Debes estar presente al momento de la entrega", style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                    Text("• El transportador esperará máximo 10 minutos",   style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                    Text("• Ten el dinero exacto disponible",               style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                  ]),
+                ),
+                const SizedBox(height: 14),
+                GestureDetector(
+                  onTap: () => setState(() => aceptaCondiciones = !aceptaCondiciones),
+                  child: Row(children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 22, height: 22,
+                      decoration: BoxDecoration(
+                        color: aceptaCondiciones ? _accent.withOpacity(0.20) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: aceptaCondiciones ? _accent : _textSec, width: 1.5)),
+                      child: aceptaCondiciones
+                          ? const Icon(Icons.check_rounded, color: _accent, size: 14) : null,
+                    ),
+                    const SizedBox(width: 10),
+                    const Text("Acepto las condiciones de contra entrega",
+                        style: TextStyle(color: _textPri, fontSize: 13)),
+                  ]),
+                ),
+              ])),
+
+            const SizedBox(height: 8),
+
+            // ── Botón pagar ──
+            GestureDetector(
+              onTap: loading ? null : pagar,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 17),
+                decoration: BoxDecoration(
+                  color: loading ? _accent.withOpacity(0.50) : _accent,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: loading ? [] : [BoxShadow(color: _accent.withOpacity(0.35), blurRadius: 18)],
+                ),
+                child: loading
+                    ? const Center(child: SizedBox(width: 22, height: 22,
+                        child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5)))
+                    : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        const Icon(Icons.lock_outline_rounded, color: Colors.black, size: 18),
+                        const SizedBox(width: 8),
+                        Text("Pagar ${_fmtPrice(widget.total)}",
+                            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w800, fontSize: 16)),
+                      ]),
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

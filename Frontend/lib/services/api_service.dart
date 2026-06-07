@@ -1,28 +1,38 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
 
 class ApiService {
-  final String baseUrl = "http://localhost:8000"; // 🔥 importante para web
+  // 🔥 CAMBIAR ESTA LÍNEA AL SUBIR A PRODUCCIÓN
+  static const String _host = "http://localhost:8000";
+
+  final String baseUrl = _host;
   final String? token;
 
   ApiService({this.token});
 
-  // 🔐 HEADERS
   Map<String, String> get headers => {
         "Content-Type": "application/json",
         if (token != null) "Authorization": "Bearer $token",
       };
 
+  // 🔥 RESOLVER URL DE IMAGEN
+  // /static/products/xxx.jpg → http://localhost:8000/static/products/xxx.jpg
+  // https://ejemplo.com/img.jpg → se queda igual
+  static String resolveImage(String? image) {
+    if (image == null || image.isEmpty) return '';
+    if (image.startsWith('http')) return image;
+    return '$_host$image';
+  }
+
   // 📦 OBTENER PRODUCTOS
   Future<List<Product>> getProducts() async {
     final response = await http.get(
-      Uri.parse("$baseUrl/products/"), // 🔥 IMPORTANTE /
+      Uri.parse("$baseUrl/products/"),
       headers: headers,
     );
-
     print("GET PRODUCTS => ${response.body}");
-
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
       return data.map((e) => Product.fromJson(e)).toList();
@@ -38,9 +48,7 @@ class ApiService {
       headers: headers,
       body: jsonEncode(product.toJson()),
     );
-
     print("CREATE => ${response.body}");
-
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception("Error al crear producto: ${response.body}");
     }
@@ -53,9 +61,7 @@ class ApiService {
       headers: headers,
       body: jsonEncode(product.toJson()),
     );
-
     print("UPDATE => ${response.body}");
-
     if (response.statusCode != 200) {
       throw Exception("Error al actualizar producto: ${response.body}");
     }
@@ -67,46 +73,72 @@ class ApiService {
       Uri.parse("$baseUrl/products/$id"),
       headers: headers,
     );
-
     print("DELETE => ${response.body}");
-
     if (response.statusCode != 200) {
       throw Exception("Error al eliminar producto: ${response.body}");
     }
   }
-  // ❤️ FAVORITOS - OBTENER
-Future<List<dynamic>> getFavorites(String token) async {
-  final res = await http.get(
-    Uri.parse("$baseUrl/favorites/"),
-    headers: {
-      "Authorization": "Bearer $token",
-    },
-  );
 
-  return jsonDecode(res.body);
-}
+  // 🖼 SUBIR IMAGEN — recibe bytes para compatibilidad web
+  Future<String?> uploadProductImage(
+      Uint8List fileBytes, String fileName) async {
+    final uri = Uri.parse("$baseUrl/products/upload-image");
 
-// ❤️ AGREGAR FAVORITO
-Future<bool> addFavorite(String token, int productId) async {
-  final res = await http.post(
-    Uri.parse("$baseUrl/favorites/$productId"),
-    headers: {
-      "Authorization": "Bearer $token",
-    },
-  );
+    final request = http.MultipartRequest("POST", uri);
 
-  return res.statusCode == 200;
-}
+    // Agrega token si existe
+    if (token != null) {
+      request.headers["Authorization"] = "Bearer $token";
+    }
 
-// 💔 QUITAR FAVORITO
-Future<bool> removeFavorite(String token, int productId) async {
-  final res = await http.delete(
-    Uri.parse("$baseUrl/favorites/$productId"),
-    headers: {
-      "Authorization": "Bearer $token",
-    },
-  );
+    // Adjunta el archivo como bytes (funciona en web y móvil)
+    request.files.add(http.MultipartFile.fromBytes(
+      "file",
+      fileBytes,
+      filename: fileName,
+    ));
 
-  return res.statusCode == 200;
-}
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    print("UPLOAD IMAGE => ${response.statusCode} | ${response.body}");
+
+    if (response.statusCode == 200) {
+      // El backend puede devolver la URL como string o dentro de un JSON
+      final body = response.body.trim();
+      // Si viene como JSON: {"url": "http://..."} o {"image_url": "/static/..."}
+      if (body.startsWith('{')) {
+        final json = jsonDecode(body);
+        return json['url'] ?? json['image_url'] ?? json['filename'];
+      }
+      // Si viene como string directo
+      return body.replaceAll('"', '');
+    }
+    return null;
+  }
+
+  // ❤️ FAVORITOS
+  Future<List<dynamic>> getFavorites(String token) async {
+    final res = await http.get(
+      Uri.parse("$baseUrl/favorites/"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+    return jsonDecode(res.body);
+  }
+
+  Future<bool> addFavorite(String token, int productId) async {
+    final res = await http.post(
+      Uri.parse("$baseUrl/favorites/$productId"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+    return res.statusCode == 200 || res.statusCode == 201;
+  }
+
+  Future<bool> removeFavorite(String token, int productId) async {
+    final res = await http.delete(
+      Uri.parse("$baseUrl/favorites/$productId"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+    return res.statusCode >= 200 && res.statusCode < 300;
+  }
 }

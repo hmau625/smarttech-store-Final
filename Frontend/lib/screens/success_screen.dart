@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'product_list_screen.dart';
 import 'cart_screen.dart';
 
@@ -128,6 +127,11 @@ class SuccessScreen extends StatelessWidget {
                     child: Column(
                       children: [
 
+                        // ✨ BADGE ANIMADO
+                        _PulsingBadge(),
+
+                        const SizedBox(height: 16),
+
                         // 🎉 TITULO
                         const Text(
                           "¡Compra exitosa!",
@@ -154,7 +158,12 @@ class SuccessScreen extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
 
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 24),
+
+                        // ✨ TRACKER DE PASOS
+                        _OrderTracker(),
+
+                        const SizedBox(height: 24),
 
                         // 🔹 INFO BOX
                         Container(
@@ -210,123 +219,98 @@ class SuccessScreen extends StatelessWidget {
 
                         const SizedBox(height: 32),
 
-                        // 🏠 BOTÓN PRODUCTOS
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _accent,
-
-                              elevation: 10,
-
-                              shadowColor:
-                                  _accent.withOpacity(0.35),
-
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(18),
-                              ),
-                            ),
-
-                            onPressed: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductListScreen(
-  token: token,
-),
-                                ),
-                                (route) => false,
-                              );
-                            },
-
-                            child: const Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                              children: [
-
-                                Icon(
-                                  Icons.home_rounded,
-                                  color: Colors.black,
-                                  size: 22,
-                                ),
-
-                                SizedBox(width: 10),
-
-                                Text(
-                                  "Volver a productos",
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    letterSpacing: 0.3,
+                        // ✨ BOTONES EN ROW para web/desktop
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isWide = constraints.maxWidth > 420;
+                            final buttons = [
+                              // 🏠 BOTÓN PRODUCTOS
+                              Expanded(
+                                child: SizedBox(
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: _accent,
+                                      elevation: 10,
+                                      shadowColor: _accent.withOpacity(0.35),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ProductListScreen(token: token),
+                                        ),
+                                        (route) => false,
+                                      );
+                                    },
+                                    child: const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.home_rounded, color: Colors.black, size: 22),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          "Volver a productos",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // 🛒 BOTÓN CARRITO
-                        SizedBox(
-                          width: double.infinity,
-                          height: 54,
-
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                color:
-                                    Colors.white.withOpacity(0.08),
                               ),
-
-                              backgroundColor:
-                                  Colors.white.withOpacity(0.03),
-
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(18),
-                              ),
-                            ),
-
-                            onPressed: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const CartScreen(),
-                                ),
-                                (route) => false,
-                              );
-                            },
-
-                            child: const Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                              children: [
-
-                                Icon(
-                                  Icons.shopping_cart_outlined,
-                                  color: _textPri,
-                                  size: 20,
-                                ),
-
-                                SizedBox(width: 10),
-
-                                Text(
-                                  "Ver carrito",
-                                  style: TextStyle(
-                                    color: _textPri,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
+                              SizedBox(width: isWide ? 12 : 0, height: isWide ? 0 : 16),
+                              // 🛒 BOTÓN CARRITO
+                              Expanded(
+                                child: SizedBox(
+                                  height: 54,
+                                  child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                                      backgroundColor: Colors.white.withOpacity(0.03),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const CartScreen(),
+                                        ),
+                                        (route) => false,
+                                      );
+                                    },
+                                    child: const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.shopping_cart_outlined, color: _textPri, size: 20),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          "Ver carrito",
+                                          style: TextStyle(
+                                            color: _textPri,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            ];
+
+                            return isWide
+                                ? Row(children: buttons)
+                                : Column(children: buttons);
+                          },
                         ),
                       ],
                     ),
@@ -346,6 +330,166 @@ class SuccessScreen extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ✨ BADGE con punto pulsante
+class _PulsingBadge extends StatefulWidget {
+  @override
+  State<_PulsingBadge> createState() => _PulsingBadgeState();
+}
+
+class _PulsingBadgeState extends State<_PulsingBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _opacity;
+
+  static const _accent = Color(0xFF00D4FF);
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1800))
+      ..repeat(reverse: true);
+    _opacity = Tween<double>(begin: 1.0, end: 0.25)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: _accent.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _accent.withOpacity(0.16), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedBuilder(
+            animation: _opacity,
+            builder: (_, __) => Opacity(
+              opacity: _opacity.value,
+              child: Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  color: _accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 7),
+          const Text(
+            "PEDIDO CONFIRMADO",
+            style: TextStyle(
+              color: _accent,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ✨ TRACKER de pasos del pedido
+class _OrderTracker extends StatelessWidget {
+  static const _accent = Color(0xFF00D4FF);
+  static const _textSec = Color(0xFF7A9BB5);
+  static const _divider = Color(0xFF1A2E44);
+
+  const _OrderTracker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _Step(icon: Icons.check_circle_rounded, label: "Confirmado", done: true),
+        _Connector(done: false),
+        _Step(icon: Icons.inventory_2_outlined, label: "Empacando", done: false),
+        _Connector(done: false),
+        _Step(icon: Icons.local_shipping_outlined, label: "En camino", done: false),
+      ],
+    );
+  }
+}
+
+class _Step extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool done;
+
+  static const _accent = Color(0xFF00D4FF);
+  static const _textSec = Color(0xFF7A9BB5);
+  static const _divider = Color(0xFF1A2E44);
+
+  const _Step({required this.icon, required this.label, required this.done});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: done ? _accent.withOpacity(0.12) : _divider.withOpacity(0.4),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: done ? _accent.withOpacity(0.35) : _divider,
+              width: 1.5,
+            ),
+          ),
+          child: Icon(icon, color: done ? _accent : _textSec, size: 19),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w600,
+            color: done ? _accent : _textSec,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Connector extends StatelessWidget {
+  final bool done;
+  static const _accent = Color(0xFF00D4FF);
+  static const _divider = Color(0xFF1A2E44);
+
+  const _Connector({required this.done});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        height: 1.5,
+        margin: const EdgeInsets.only(bottom: 22),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: done
+                ? [_accent.withOpacity(0.5), _accent.withOpacity(0.1)]
+                : [_divider, _divider],
           ),
         ),
       ),
