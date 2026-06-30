@@ -1,7 +1,16 @@
+﻿import os
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
-SECRET_KEY = "supersecretkey123"
+load_dotenv()
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "Falta JWT_SECRET_KEY en las variables de entorno. "
+        "Crea un archivo .env (ver .env.example) o configuralo en Railway."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

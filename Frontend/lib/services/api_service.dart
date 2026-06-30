@@ -1,11 +1,12 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
 
 class ApiService {
-  // 🔥 CAMBIAR ESTA LÍNEA AL SUBIR A PRODUCCIÓN
-  static const String _host = "http://localhost:8000";
+  // ðŸ”¥ CAMBIAR ESTA LÃNEA AL SUBIR A PRODUCCIÃ“N
+  static const String _host = ApiConfig.baseUrl;
 
   final String baseUrl = _host;
   final String? token;
@@ -17,16 +18,16 @@ class ApiService {
         if (token != null) "Authorization": "Bearer $token",
       };
 
-  // 🔥 RESOLVER URL DE IMAGEN
-  // /static/products/xxx.jpg → http://localhost:8000/static/products/xxx.jpg
-  // https://ejemplo.com/img.jpg → se queda igual
+  // ðŸ”¥ RESOLVER URL DE IMAGEN
+  // /static/products/xxx.jpg â†’ http://localhost:8000/static/products/xxx.jpg
+  // https://ejemplo.com/img.jpg â†’ se queda igual
   static String resolveImage(String? image) {
     if (image == null || image.isEmpty) return '';
     if (image.startsWith('http')) return image;
     return '$_host$image';
   }
 
-  // 📦 OBTENER PRODUCTOS
+  // ðŸ“¦ OBTENER PRODUCTOS
   Future<List<Product>> getProducts() async {
     final response = await http.get(
       Uri.parse("$baseUrl/products/"),
@@ -41,7 +42,7 @@ class ApiService {
     }
   }
 
-  // ➕ CREAR PRODUCTO
+  // âž• CREAR PRODUCTO
   Future<void> createProduct(Product product) async {
     final response = await http.post(
       Uri.parse("$baseUrl/products/"),
@@ -54,7 +55,7 @@ class ApiService {
     }
   }
 
-  // ✏️ ACTUALIZAR PRODUCTO
+  // âœï¸ ACTUALIZAR PRODUCTO
   Future<void> updateProduct(Product product) async {
     final response = await http.put(
       Uri.parse("$baseUrl/products/${product.id}"),
@@ -67,7 +68,7 @@ class ApiService {
     }
   }
 
-  // 🗑 ELIMINAR PRODUCTO
+  // ðŸ—‘ ELIMINAR PRODUCTO
   Future<void> deleteProduct(int id) async {
     final response = await http.delete(
       Uri.parse("$baseUrl/products/$id"),
@@ -79,7 +80,7 @@ class ApiService {
     }
   }
 
-  // 🖼 SUBIR IMAGEN — recibe bytes para compatibilidad web
+  // ðŸ–¼ SUBIR IMAGEN â€” recibe bytes para compatibilidad web
   Future<String?> uploadProductImage(
       Uint8List fileBytes, String fileName) async {
     final uri = Uri.parse("$baseUrl/products/upload-image");
@@ -91,7 +92,7 @@ class ApiService {
       request.headers["Authorization"] = "Bearer $token";
     }
 
-    // Adjunta el archivo como bytes (funciona en web y móvil)
+    // Adjunta el archivo como bytes (funciona en web y mÃ³vil)
     request.files.add(http.MultipartFile.fromBytes(
       "file",
       fileBytes,
@@ -117,7 +118,7 @@ class ApiService {
     return null;
   }
 
-  // ❤️ FAVORITOS
+  // â¤ï¸ FAVORITOS
   Future<List<dynamic>> getFavorites(String token) async {
     final res = await http.get(
       Uri.parse("$baseUrl/favorites/"),

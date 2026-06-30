@@ -1,12 +1,21 @@
+﻿import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-DATABASE_URL = "mysql+mysqlconnector://root:Hm_1019985600@127.0.0.1/smarttech_store"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "Falta DATABASE_URL en las variables de entorno. "
+        "Crea un archivo .env (ver .env.example) o configuralo en Railway."
+    )
 
 engine = create_engine(
     DATABASE_URL,
-    echo=True
+    echo=False
 )
 
 SessionLocal = sessionmaker(

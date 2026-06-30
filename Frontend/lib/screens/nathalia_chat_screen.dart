@@ -1,15 +1,16 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DEPENDENCIA REQUERIDA en pubspec.yaml:
 //   shared_preferences: ^2.2.3
 //
 // Llama esto desde cualquier pantalla para abrir el chat flotante:
 //   showNathaliaChat(context, token);
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 void showNathaliaChat(BuildContext context, String token, {String? initialMessage}) {
   showModalBottomSheet(
@@ -52,19 +53,19 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
   static const _historyKey = 'chat_history';
   static const _maxSavedMessages = 50;
 
-  final String _baseUrl = "http://localhost:8000";
+  final String _baseUrl = ApiConfig.baseUrl;
 
   static const _welcomeMessage = {
     "role": "assistant",
-    "content": "¡Hola! Soy Nathalia, tu asistente de SmartTech 🛍️\n\n"
+    "content": "Â¡Hola! Soy Nathalia, tu asistente de SmartTech ðŸ›ï¸\n\n"
         "Puedo ayudarte a:\n"
-        "🔹 Recomendar según tu presupuesto\n"
-        "🔹 Comparar componentes\n"
-        "🔹 Armar un PC completo\n\n"
-        "¿Qué necesitas?",
+        "ðŸ”¹ Recomendar segÃºn tu presupuesto\n"
+        "ðŸ”¹ Comparar componentes\n"
+        "ðŸ”¹ Armar un PC completo\n\n"
+        "Â¿QuÃ© necesitas?",
   };
 
-  // ── Historial persistente ─────────────────────────────────────────────────
+  // â”€â”€ Historial persistente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> _loadHistory() async {
     try {
@@ -96,7 +97,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
           : List<Map<String, String>>.from(_messages);
       await prefs.setString(_historyKey, jsonEncode(toSave));
     } catch (_) {
-      // Fallo silencioso, no crítico
+      // Fallo silencioso, no crÃ­tico
     }
   }
 
@@ -111,7 +112,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
     });
   }
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  // â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   void initState() {
@@ -120,7 +121,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
     _messages.add(Map<String, String>.from(_welcomeMessage));
     // Intenta cargar historial guardado (lo reemplaza si existe)
     _loadHistory();
-    // Mensaje inicial automático (ej: desde product detail)
+    // Mensaje inicial automÃ¡tico (ej: desde product detail)
     if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
       Future.delayed(const Duration(milliseconds: 400), () {
         if (mounted) _send(widget.initialMessage);
@@ -147,7 +148,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
     });
   }
 
-  // ── Enviar mensaje ────────────────────────────────────────────────────────
+  // â”€â”€ Enviar mensaje â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> _send([String? override]) async {
     final text = override ?? _controller.text.trim();
@@ -184,22 +185,22 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
       } else {
         setState(() => _messages.add({
           "role": "assistant",
-          "content": "Ups, tuve un problema. Intenta de nuevo 😅",
+          "content": "Ups, tuve un problema. Intenta de nuevo ðŸ˜…",
         }));
       }
     } catch (e) {
       setState(() => _messages.add({
         "role": "assistant",
-        "content": "Error de conexión 🔌",
+        "content": "Error de conexiÃ³n ðŸ”Œ",
       }));
     }
 
     setState(() => _loading = false);
     _scrollToBottom();
-    await _saveHistory(); // Guarda después de cada intercambio
+    await _saveHistory(); // Guarda despuÃ©s de cada intercambio
   }
 
-  // ── Agregar al carrito ────────────────────────────────────────────────────
+  // â”€â”€ Agregar al carrito â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> _addToCart(int productId) async {
     try {
@@ -209,25 +210,25 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
       if (res.statusCode == 200) {
         setState(() => _messages.add({
           "role": "assistant",
-          "content": "Listo, producto #$productId agregado al carrito 🛒",
+          "content": "Listo, producto #$productId agregado al carrito ðŸ›’",
         }));
       } else {
         setState(() => _messages.add({
           "role": "assistant",
-          "content": "No pude agregar el producto #$productId al carrito 😕",
+          "content": "No pude agregar el producto #$productId al carrito ðŸ˜•",
         }));
       }
     } catch (_) {
       setState(() => _messages.add({
         "role": "assistant",
-        "content": "Error de conexión al agregar 🔌",
+        "content": "Error de conexiÃ³n al agregar ðŸ”Œ",
       }));
     }
     _scrollToBottom();
     await _saveHistory();
   }
 
-  // ── Procesar respuesta — FIX: allMatches para múltiples CART_ADD ──────────
+  // â”€â”€ Procesar respuesta â€” FIX: allMatches para mÃºltiples CART_ADD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   void _processResponse(String response) {
     // allMatches captura TODOS los CART_ADD:X, no solo el primero
@@ -250,14 +251,14 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
     }
   }
 
-  // ── Extraer productos con [ID:X] para mostrar botones ────────────────────
+  // â”€â”€ Extraer productos con [ID:X] para mostrar botones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   List<MapEntry<String, int>> _extractProducts(String text) {
     final matches = RegExp(r'([^.\n\[]+?)\s*\[ID:(\d+)\]').allMatches(text);
     return matches.map((m) => MapEntry(m.group(1)!.trim(), int.parse(m.group(2)!))).toList();
   }
 
-  // ── Chip de sugerencia ────────────────────────────────────────────────────
+  // â”€â”€ Chip de sugerencia â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _chip(String label, String msg) {
     return GestureDetector(
@@ -275,7 +276,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
     );
   }
 
-  // ── Burbuja de mensaje ────────────────────────────────────────────────────
+  // â”€â”€ Burbuja de mensaje â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _bubble(Map<String, String> msg) {
     final isUser = msg["role"] == "user";
@@ -360,7 +361,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
     );
   }
 
-  // ── Typing indicator ──────────────────────────────────────────────────────
+  // â”€â”€ Typing indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _typing() {
     return Padding(
@@ -416,7 +417,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
     );
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Widget build(BuildContext context) {
@@ -434,7 +435,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
           ),
           child: Column(
             children: [
-              // ── Handle + Header ──────────────────────────────────────────
+              // â”€â”€ Handle + Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                 decoration: BoxDecoration(
@@ -478,7 +479,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
                           ],
                         ),
                       ),
-                      // Botón limpiar historial
+                      // BotÃ³n limpiar historial
                       GestureDetector(
                         onTap: () async {
                           final confirm = await showDialog<bool>(
@@ -490,7 +491,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
                               title: const Text("Limpiar historial",
                                   style: TextStyle(color: _textPri, fontSize: 16)),
                               content: const Text(
-                                "¿Borrar toda la conversación?",
+                                "Â¿Borrar toda la conversaciÃ³n?",
                                 style: TextStyle(color: _textSec, fontSize: 14),
                               ),
                               actions: [
@@ -520,7 +521,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
                               color: _textSec, size: 18),
                         ),
                       ),
-                      // Botón cerrar
+                      // BotÃ³n cerrar
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Container(
@@ -537,7 +538,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
                 ),
               ),
 
-              // ── Messages ─────────────────────────────────────────────────
+              // â”€â”€ Messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               Expanded(
                 child: ListView.builder(
                   controller: _scrollCtrl,
@@ -550,23 +551,23 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
                 ),
               ),
 
-              // ── Suggestions ──────────────────────────────────────────────
+              // â”€â”€ Suggestions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               if (showSuggestions)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                   child: Row(children: [
-                    _chip("💰 PC Gamer \$3M", "Quiero armar un PC gamer con presupuesto de 3 millones"),
+                    _chip("ðŸ’° PC Gamer \$3M", "Quiero armar un PC gamer con presupuesto de 3 millones"),
                     const SizedBox(width: 6),
-                    _chip("🔄 Comparar GPUs", "Compara las tarjetas gráficas disponibles"),
+                    _chip("ðŸ”„ Comparar GPUs", "Compara las tarjetas grÃ¡ficas disponibles"),
                     const SizedBox(width: 6),
-                    _chip("💻 PC programar", "PC para programación, qué me recomiendas?"),
+                    _chip("ðŸ’» PC programar", "PC para programaciÃ³n, quÃ© me recomiendas?"),
                     const SizedBox(width: 6),
-                    _chip("🎮 Mejor GPU", "Cuál es la mejor GPU que tienen?"),
+                    _chip("ðŸŽ® Mejor GPU", "CuÃ¡l es la mejor GPU que tienen?"),
                   ]),
                 ),
 
-              // ── Input ─────────────────────────────────────────────────────
+              // â”€â”€ Input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
               Container(
                 padding: EdgeInsets.fromLTRB(
                     12, 8, 12, MediaQuery.of(context).padding.bottom + 12),
@@ -589,7 +590,7 @@ class _NathaliaChatSheetState extends State<_NathaliaChatSheet> {
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _send(),
                         decoration: InputDecoration(
-                          hintText: "Pregúntale a Nathalia...",
+                          hintText: "PregÃºntale a Nathalia...",
                           hintStyle: TextStyle(
                               color: _textSec.withOpacity(0.5), fontSize: 12),
                           contentPadding: const EdgeInsets.symmetric(

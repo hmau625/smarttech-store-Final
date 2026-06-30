@@ -1,5 +1,24 @@
-.env
+﻿# Entornos virtuales de Python (NO se suben a git)
+venv/
+entorno_ia/
+*/venv/
+.venv/
+
+# Cache de Python
 __pycache__/
 *.pyc
-venv/
-*.pyc
+*.pyo
+
+# Variables de entorno con secretos (NO se suben a git)
+.env
+Backend/.env
+
+# Flutter
+Frontend/build/
+Frontend/.dart_tool/
+Frontend/.flutter-plugins
+Frontend/.flutter-plugins-dependencies
+
+# Sistema
+.DS_Store
+Thumbs.db

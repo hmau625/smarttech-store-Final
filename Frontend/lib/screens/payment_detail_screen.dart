@@ -1,3 +1,4 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,9 +43,9 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
   bool aceptaCondiciones = false;
   String? tipoDocumento;
 
-  final baseUrl = "http://127.0.0.1:8000";
+  final baseUrl = ApiConfig.baseUrl;
 
-  // ── Paleta de colores ────────────────────────────────────────────────────
+  // â”€â”€ Paleta de colores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const _bg      = Color(0xFF060D17);
   static const _surface = Color(0xFF0D1F33);
   static const _card    = Color(0xFF111E2E);
@@ -144,34 +145,34 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     final isNequi = widget.method == "nequi";
     final isCOD   = widget.method == "contra_entrega";
 
-    if (nombre.text.trim().length < 3)   return msg("Nombre inválido (mín. 3 letras)", error: true);
-    if (apellido.text.trim().length < 3)  return msg("Apellido inválido (mín. 3 letras)", error: true);
+    if (nombre.text.trim().length < 3)   return msg("Nombre invÃ¡lido (mÃ­n. 3 letras)", error: true);
+    if (apellido.text.trim().length < 3)  return msg("Apellido invÃ¡lido (mÃ­n. 3 letras)", error: true);
     if (tipoDocumento == null)            return msg("Selecciona el tipo de documento", error: true);
-    if (documento.text.trim().length < 6) return msg("Documento inválido (mín. 6 dígitos)", error: true);
+    if (documento.text.trim().length < 6) return msg("Documento invÃ¡lido (mÃ­n. 6 dÃ­gitos)", error: true);
     if (!RegExp(r'^[0-9]+$').hasMatch(documento.text.trim()))
-      return msg("El documento solo debe tener números", error: true);
+      return msg("El documento solo debe tener nÃºmeros", error: true);
     if (!RegExp(r'^[0-9]{10}$').hasMatch(telefono.text.trim()))
-      return msg("Teléfono inválido (10 dígitos)", error: true);
-    if (countryController.text.trim().isEmpty) return msg("Selecciona el país", error: true);
+      return msg("TelÃ©fono invÃ¡lido (10 dÃ­gitos)", error: true);
+    if (countryController.text.trim().isEmpty) return msg("Selecciona el paÃ­s", error: true);
     if (cityController.text.trim().isEmpty)    return msg("Selecciona la ciudad", error: true);
-    if (direccion.text.trim().length < 5)      return msg("Dirección inválida", error: true);
+    if (direccion.text.trim().length < 5)      return msg("DirecciÃ³n invÃ¡lida", error: true);
     if (fecha == null)                         return msg("Selecciona fecha de entrega", error: true);
 
     if (isCard) {
       final card = tarjeta.text.replaceAll("-", "");
-      if (card.length != 16) return msg("Número de tarjeta inválido", error: true);
-      if (cvv.text.length != 3) return msg("CVV inválido (3 dígitos)", error: true);
+      if (card.length != 16) return msg("NÃºmero de tarjeta invÃ¡lido", error: true);
+      if (cvv.text.length != 3) return msg("CVV invÃ¡lido (3 dÃ­gitos)", error: true);
       final ref = referenciaPago.text.trim();
       if (ref.length < 3 || ref.length > 6 || !RegExp(r'^[0-9]+$').hasMatch(ref))
-        return msg("Código de confirmación inválido (3 a 6 dígitos)", error: true);
+        return msg("CÃ³digo de confirmaciÃ³n invÃ¡lido (3 a 6 dÃ­gitos)", error: true);
     }
 
     if (isNequi) {
       if (!RegExp(r'^[0-9]{10}$').hasMatch(numeroNequi.text.trim()))
-        return msg("Número Nequi inválido (10 dígitos)", error: true);
+        return msg("NÃºmero Nequi invÃ¡lido (10 dÃ­gitos)", error: true);
       final ref = referenciaPago.text.trim();
       if (ref.length != 4 || !RegExp(r'^[0-9]+$').hasMatch(ref))
-        return msg("Código Nequi inválido (exactamente 4 dígitos)", error: true);
+        return msg("CÃ³digo Nequi invÃ¡lido (exactamente 4 dÃ­gitos)", error: true);
     }
 
     if (isCOD && !aceptaCondiciones)
@@ -207,7 +208,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
       setState(() => loading = false);
 
       if (res.statusCode == 200 || res.statusCode == 201) {
-        msg("¡Compra realizada con éxito!");
+        msg("Â¡Compra realizada con Ã©xito!");
         Navigator.push(context, MaterialPageRoute(
           builder: (_) => SuccessScreen(token: widget.token),
         ));
@@ -221,11 +222,11 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
       }
     } catch (e) {
       setState(() => loading = false);
-      msg("Error de conexión", error: true);
+      msg("Error de conexiÃ³n", error: true);
     }
   }
 
-  // ════════════════ WIDGETS ════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• WIDGETS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Widget _input(String label, TextEditingController c, IconData icon, {
     TextInputType type = TextInputType.text,
@@ -287,16 +288,16 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
     );
   }
 
-  // ── Location Picker con texto completamente blanco en el diálogo ─────────
+  // â”€â”€ Location Picker con texto completamente blanco en el diÃ¡logo â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _locationPicker() {
     return Theme(
       data: ThemeData.dark().copyWith(
-        // Texto general en todo el widget y diálogos
+        // Texto general en todo el widget y diÃ¡logos
         textTheme: ThemeData.dark().textTheme.apply(
           bodyColor: _textPri,
           displayColor: _textPri,
         ),
-        // Estilo de los ListTile dentro del diálogo (cada país/estado/ciudad)
+        // Estilo de los ListTile dentro del diÃ¡logo (cada paÃ­s/estado/ciudad)
         listTileTheme: const ListTileThemeData(
           textColor: Color(0xFFEFF6FF),
           titleTextStyle: TextStyle(
@@ -306,7 +307,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
           ),
           iconColor: Color(0xFF00D4FF),
         ),
-        // Tema del diálogo — fuerza texto blanco en título y contenido
+        // Tema del diÃ¡logo â€” fuerza texto blanco en tÃ­tulo y contenido
         dialogTheme: DialogThemeData(
           backgroundColor: _card,
           titleTextStyle: const TextStyle(
@@ -321,7 +322,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
         ),
         dialogBackgroundColor: _card,
         primaryColor: _accent,
-        // Barra de búsqueda dentro del diálogo
+        // Barra de bÃºsqueda dentro del diÃ¡logo
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFF0A1929),
@@ -338,13 +339,13 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
           primary: _accent,
           onPrimary: Colors.black,
           surface: _card,
-          onSurface: Color(0xFFEFF6FF),       // ← texto sobre superficie (lista)
+          onSurface: Color(0xFFEFF6FF),       // â† texto sobre superficie (lista)
           secondary: _accent,
           onSecondary: Colors.black,
           background: _card,
-          onBackground: Color(0xFFEFF6FF),    // ← texto sobre fondo del diálogo
+          onBackground: Color(0xFFEFF6FF),    // â† texto sobre fondo del diÃ¡logo
         ),
-        // Botón "Close" del diálogo
+        // BotÃ³n "Close" del diÃ¡logo
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(foregroundColor: _accent),
         ),
@@ -396,7 +397,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
         child: Column(
           children: [
 
-            // ── Total ──
+            // â”€â”€ Total â”€â”€
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(18),
@@ -422,25 +423,25 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
               ]),
             ),
 
-            // ── Datos personales ──
+            // â”€â”€ Datos personales â”€â”€
             _section("Datos personales", Icons.person_outline, Column(
               children: [
                 _input("Nombre", nombre, Icons.person_outline),
                 _input("Apellido", apellido, Icons.person),
-                _input("Teléfono de contacto", telefono, Icons.phone_outlined,
+                _input("TelÃ©fono de contacto", telefono, Icons.phone_outlined,
                     type: TextInputType.phone,
                     formatters: [FilteringTextInputFormatter.digitsOnly,
                                  LengthLimitingTextInputFormatter(10)]),
               ],
             )),
 
-            // ── Dirección ──
-            _section("Dirección de entrega", Icons.location_on_outlined, Column(
+            // â”€â”€ DirecciÃ³n â”€â”€
+            _section("DirecciÃ³n de entrega", Icons.location_on_outlined, Column(
               children: [
                 _locationPicker(),
                 const SizedBox(height: 14),
 
-                // Documento — aparece solo cuando hay país seleccionado
+                // Documento â€” aparece solo cuando hay paÃ­s seleccionado
                 if (!paisSeleccionado)
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -453,7 +454,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                     child: Row(children: const [
                       Icon(Icons.info_outline, color: _textSec, size: 15),
                       SizedBox(width: 8),
-                      Text("Selecciona el país para ver los tipos de documento",
+                      Text("Selecciona el paÃ­s para ver los tipos de documento",
                           style: TextStyle(color: _textSec, fontSize: 12)),
                     ]),
                   )
@@ -485,15 +486,15 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                       onChanged: (v) => setState(() => tipoDocumento = v),
                     ),
                   ),
-                  _input("Número de documento", documento, Icons.badge_outlined,
+                  _input("NÃºmero de documento", documento, Icons.badge_outlined,
                       type: TextInputType.number,
                       formatters: [FilteringTextInputFormatter.digitsOnly,
                                    LengthLimitingTextInputFormatter(12)]),
                 ],
 
-                _input("Dirección exacta", direccion, Icons.home_outlined, maxLines: 2),
+                _input("DirecciÃ³n exacta", direccion, Icons.home_outlined, maxLines: 2),
 
-                // ── Fecha de entrega ──
+                // â”€â”€ Fecha de entrega â”€â”€
                 GestureDetector(
                   onTap: pickDate,
                   child: Container(
@@ -524,16 +525,16 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
               ],
             )),
 
-            // ── Tarjeta ──
+            // â”€â”€ Tarjeta â”€â”€
             if (isCard)
               _section("Datos de tarjeta", Icons.credit_card_outlined, Column(children: [
-                _input("Número de tarjeta", tarjeta, Icons.credit_card,
+                _input("NÃºmero de tarjeta", tarjeta, Icons.credit_card,
                     type: TextInputType.number, onChanged: formatCard),
-                _input("CVV (3 dígitos)", cvv, Icons.lock_outline,
+                _input("CVV (3 dÃ­gitos)", cvv, Icons.lock_outline,
                     type: TextInputType.number,
                     formatters: [FilteringTextInputFormatter.digitsOnly,
                                  LengthLimitingTextInputFormatter(3)]),
-                _input("Código de confirmación (3–6 dígitos)", referenciaPago,
+                _input("CÃ³digo de confirmaciÃ³n (3â€“6 dÃ­gitos)", referenciaPago,
                     Icons.pin_outlined,
                     type: TextInputType.number,
                     formatters: [FilteringTextInputFormatter.digitsOnly,
@@ -547,13 +548,13 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                     Icon(Icons.info_outline, color: _textSec, size: 14),
                     SizedBox(width: 8),
                     Expanded(child: Text(
-                      "El código de confirmación es enviado por tu banco al aprobar el pago",
+                      "El cÃ³digo de confirmaciÃ³n es enviado por tu banco al aprobar el pago",
                       style: TextStyle(color: _textSec, fontSize: 11))),
                   ]),
                 ),
               ])),
 
-            // ── Nequi ──
+            // â”€â”€ Nequi â”€â”€
             if (isNequi)
               _section("Datos Nequi", Icons.phone_android_outlined, Column(children: [
                 Container(
@@ -567,22 +568,22 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                     Icon(Icons.info_outline, color: Color(0xFF9B59B6), size: 16),
                     SizedBox(width: 8),
                     Expanded(child: Text(
-                      "Ingresa tu número Nequi y el código de 4 dígitos que te llegará",
+                      "Ingresa tu nÃºmero Nequi y el cÃ³digo de 4 dÃ­gitos que te llegarÃ¡",
                       style: TextStyle(color: Color(0xFF9B59B6), fontSize: 12))),
                   ]),
                 ),
-                _input("Número Nequi (10 dígitos)", numeroNequi, Icons.phone_android,
+                _input("NÃºmero Nequi (10 dÃ­gitos)", numeroNequi, Icons.phone_android,
                     type: TextInputType.phone,
                     formatters: [FilteringTextInputFormatter.digitsOnly,
                                  LengthLimitingTextInputFormatter(10)]),
-                _input("Código de confirmación (4 dígitos)", referenciaPago,
+                _input("CÃ³digo de confirmaciÃ³n (4 dÃ­gitos)", referenciaPago,
                     Icons.pin_outlined,
                     type: TextInputType.number,
                     formatters: [FilteringTextInputFormatter.digitsOnly,
                                  LengthLimitingTextInputFormatter(4)]),
               ])),
 
-            // ── Contra entrega ──
+            // â”€â”€ Contra entrega â”€â”€
             if (isCOD)
               _section("Contra entrega", Icons.local_shipping_outlined, Column(children: [
                 Container(
@@ -594,10 +595,10 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
                     Text("Condiciones:", style: TextStyle(color: Color(0xFFFFCA28), fontWeight: FontWeight.w700, fontSize: 13)),
                     SizedBox(height: 8),
-                    Text("• Pago en efectivo al recibir el producto",      style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
-                    Text("• Debes estar presente al momento de la entrega", style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
-                    Text("• El transportador esperará máximo 10 minutos",   style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
-                    Text("• Ten el dinero exacto disponible",               style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                    Text("â€¢ Pago en efectivo al recibir el producto",      style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                    Text("â€¢ Debes estar presente al momento de la entrega", style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                    Text("â€¢ El transportador esperarÃ¡ mÃ¡ximo 10 minutos",   style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
+                    Text("â€¢ Ten el dinero exacto disponible",               style: TextStyle(color: _textSec, fontSize: 12, height: 1.5)),
                   ]),
                 ),
                 const SizedBox(height: 14),
@@ -624,7 +625,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
 
             const SizedBox(height: 8),
 
-            // ── Botón pagar ──
+            // â”€â”€ BotÃ³n pagar â”€â”€
             GestureDetector(
               onTap: loading ? null : pagar,
               child: AnimatedContainer(

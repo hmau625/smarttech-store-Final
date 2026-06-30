@@ -1,25 +1,25 @@
-import smtplib
+﻿import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# ═══════════════════════════════════════════════════════════════════
-# CONFIGURA TU GMAIL AQUÍ
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CONFIGURA TU GMAIL AQUÃ
 # 1. Ve a https://myaccount.google.com/apppasswords
-# 2. Crea una "Contraseña de aplicación" (necesitas 2FA activado)
-# 3. Pega la contraseña de 16 caracteres abajo
-# ═══════════════════════════════════════════════════════════════════
+# 2. Crea una "ContraseÃ±a de aplicaciÃ³n" (necesitas 2FA activado)
+# 3. Pega la contraseÃ±a de 16 caracteres abajo
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 SMTP_EMAIL    = "smart.tech6913@gmail.com"
 SMTP_PASSWORD = "jpjv hjev eies wqnx"
 SMTP_HOST     = "smtp.gmail.com"
 SMTP_PORT     = 587
 
 
-# ── CSS base embebido ──────────────────────────────────────────────
-# Los clientes de correo móvil (Gmail App, Apple Mail, Outlook) leen
+# â”€â”€ CSS base embebido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Los clientes de correo mÃ³vil (Gmail App, Apple Mail, Outlook) leen
 # <style> en el <head>. Esto activa el layout responsive sin JS.
 RESPONSIVE_CSS = """
 <style>
-  /* Reset básico para clientes de correo */
+  /* Reset bÃ¡sico para clientes de correo */
   body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
   table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
   img { -ms-interpolation-mode: bicubic; border: 0; display: block; }
@@ -32,7 +32,7 @@ RESPONSIVE_CSS = """
   .product-table { width: 100%; border-collapse: collapse; }
   .product-table th, .product-table td { padding: 12px; }
 
-  /* ── MÓVIL: pantallas menores a 600px ── */
+  /* â”€â”€ MÃ“VIL: pantallas menores a 600px â”€â”€ */
   @media only screen and (max-width: 600px) {
     .email-container { width: 100% !important; }
     .header-pad    { padding: 20px 16px !important; }
@@ -46,7 +46,7 @@ RESPONSIVE_CSS = """
     .total-amount  { font-size: 18px !important; }
     h1.logo-title  { font-size: 20px !important; }
 
-    /* En móvil ocultamos columnas CANT y PRECIO, solo nombre + subtotal */
+    /* En mÃ³vil ocultamos columnas CANT y PRECIO, solo nombre + subtotal */
     .col-cant, .col-precio { display: none !important; width: 0 !important; overflow: hidden !important; max-height: 0 !important; padding: 0 !important; }
     .col-nombre { width: 70% !important; }
     .col-subtotal { width: 30% !important; }
@@ -87,7 +87,7 @@ def _wrap_email(inner_html: str) -> str:
 
 
 def send_email(to_email: str, subject: str, html_body: str):
-    """Envía un email HTML usando Gmail SMTP"""
+    """EnvÃ­a un email HTML usando Gmail SMTP"""
     try:
         msg = MIMEMultipart("alternative")
         msg["From"]    = f"SmartTech Store <{SMTP_EMAIL}>"
@@ -117,11 +117,11 @@ def build_order_confirmation(
     fecha_entrega: str
 ) -> str:
     """
-    Genera HTML de confirmación de compra totalmente responsive.
-    Usa tablas anidadas para compatibilidad máxima con clientes de correo.
+    Genera HTML de confirmaciÃ³n de compra totalmente responsive.
+    Usa tablas anidadas para compatibilidad mÃ¡xima con clientes de correo.
     """
 
-    # ── Filas de productos ──────────────────────────────────────────
+    # â”€â”€ Filas de productos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     items_rows = ""
     for item in items:
         items_rows += f"""
@@ -145,32 +145,32 @@ def build_order_confirmation(
           </tr>"""
 
     metodo_label = {
-        "tarjeta":        "Tarjeta de crédito",
+        "tarjeta":        "Tarjeta de crÃ©dito",
         "nequi":          "Nequi",
         "contra_entrega": "Contra entrega"
     }.get(metodo, metodo)
 
     inner = f"""
-      <!-- ══ HEADER ══ -->
+      <!-- â•â• HEADER â•â• -->
       <tr>
         <td class="header-pad" style="background:#0D1F33; padding:30px 24px;
             text-align:center; border-bottom:2px solid #00D4FF;">
           <h1 class="logo-title" style="color:#00D4FF; margin:0; font-size:24px;
               font-family:Arial,sans-serif; font-weight:bold;">SmartTech Store</h1>
           <p style="color:#7A9BB5; margin:6px 0 0; font-size:12px;
-              letter-spacing:3px; font-family:Arial,sans-serif;">CONFIRMACIÓN DE COMPRA</p>
+              letter-spacing:3px; font-family:Arial,sans-serif;">CONFIRMACIÃ“N DE COMPRA</p>
         </td>
       </tr>
 
-      <!-- ══ CUERPO ══ -->
+      <!-- â•â• CUERPO â•â• -->
       <tr>
         <td class="body-pad" style="padding:28px 24px;">
 
           <!-- Saludo -->
           <p style="color:#EFF6FF; font-size:16px; margin:0 0 6px;
-              font-family:Arial,sans-serif;">¡Hola <strong>{nombre}</strong>! 👋</p>
+              font-family:Arial,sans-serif;">Â¡Hola <strong>{nombre}</strong>! ðŸ‘‹</p>
           <p style="color:#7A9BB5; font-size:14px; margin:0 0 20px;
-              font-family:Arial,sans-serif;">Tu compra fue procesada exitosamente. Aquí tienes el detalle:</p>
+              font-family:Arial,sans-serif;">Tu compra fue procesada exitosamente. AquÃ­ tienes el detalle:</p>
 
           <!-- Tabla de productos -->
           <table role="presentation" class="product-table" width="100%"
@@ -219,7 +219,7 @@ def build_order_confirmation(
             </tr>
           </table>
 
-          <!-- Info de envío -->
+          <!-- Info de envÃ­o -->
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
                  style="margin-top:16px; background:#111E2E; border-radius:10px;
                         border:1px solid #1A2E44;">
@@ -227,15 +227,15 @@ def build_order_confirmation(
               <td class="info-block" style="padding:20px;">
                 <p style="color:#EFF6FF; margin:0 0 10px; font-size:13px;
                     font-family:Arial,sans-serif;">
-                  📦 <strong>Método de pago:</strong> {metodo_label}
+                  ðŸ“¦ <strong>MÃ©todo de pago:</strong> {metodo_label}
                 </p>
                 <p style="color:#EFF6FF; margin:0 0 10px; font-size:13px;
                     font-family:Arial,sans-serif; word-break:break-word;">
-                  📍 <strong>Dirección:</strong> {direccion}
+                  ðŸ“ <strong>DirecciÃ³n:</strong> {direccion}
                 </p>
                 <p style="color:#EFF6FF; margin:0; font-size:13px;
                     font-family:Arial,sans-serif;">
-                  📅 <strong>Fecha de entrega:</strong> {fecha_entrega}
+                  ðŸ“… <strong>Fecha de entrega:</strong> {fecha_entrega}
                 </p>
               </td>
             </tr>
@@ -250,7 +250,7 @@ def build_order_confirmation(
                 <p style="color:#7A9BB5; margin:0 0 8px; font-size:11px;
                     letter-spacing:2px; font-family:Arial,sans-serif;">ESTADO ACTUAL</p>
                 <p style="color:#00D4FF; margin:0; font-size:20px;
-                    font-weight:bold; font-family:Arial,sans-serif;">✅ Pagado</p>
+                    font-weight:bold; font-family:Arial,sans-serif;">âœ… Pagado</p>
               </td>
             </tr>
           </table>
@@ -258,15 +258,15 @@ def build_order_confirmation(
         </td>
       </tr>
 
-      <!-- ══ FOOTER ══ -->
+      <!-- â•â• FOOTER â•â• -->
       <tr>
         <td class="footer-pad" align="center"
             style="background:#0D1F33; padding:20px 24px; border-top:1px solid #1A2E44;">
           <p style="color:#7A9BB5; font-size:11px; margin:0;
-              font-family:Arial,sans-serif;">SmartTech Store — Tu tienda de tecnología</p>
+              font-family:Arial,sans-serif;">SmartTech Store â€” Tu tienda de tecnologÃ­a</p>
           <p style="color:#7A9BB5; font-size:11px; margin:5px 0 0;
               font-family:Arial,sans-serif;">
-            Este correo fue enviado automáticamente, no respondas a este mensaje.
+            Este correo fue enviado automÃ¡ticamente, no respondas a este mensaje.
           </p>
         </td>
       </tr>
@@ -282,32 +282,32 @@ def build_status_update(
     items_summary: str
 ) -> str:
     """
-    Genera HTML de actualización de estado totalmente responsive.
+    Genera HTML de actualizaciÃ³n de estado totalmente responsive.
     """
 
     estado_info = {
-        "pagado":         {"icon": "✅", "color": "#00D4FF", "label": "Pagado"},
-        "en_preparacion": {"icon": "📦", "color": "#FFB74D", "label": "En preparación"},
-        "enviado":        {"icon": "🚚", "color": "#7C3AED", "label": "Enviado"},
-        "entregado":      {"icon": "🎉", "color": "#4CAF50", "label": "Entregado"},
-        "cancelado":      {"icon": "❌", "color": "#FF5252", "label": "Cancelado"},
+        "pagado":         {"icon": "âœ…", "color": "#00D4FF", "label": "Pagado"},
+        "en_preparacion": {"icon": "ðŸ“¦", "color": "#FFB74D", "label": "En preparaciÃ³n"},
+        "enviado":        {"icon": "ðŸšš", "color": "#7C3AED", "label": "Enviado"},
+        "entregado":      {"icon": "ðŸŽ‰", "color": "#4CAF50", "label": "Entregado"},
+        "cancelado":      {"icon": "âŒ", "color": "#FF5252", "label": "Cancelado"},
     }
 
-    info = estado_info.get(estado, {"icon": "📋", "color": "#7A9BB5", "label": estado})
+    info = estado_info.get(estado, {"icon": "ðŸ“‹", "color": "#7A9BB5", "label": estado})
 
     inner = f"""
-      <!-- ══ HEADER ══ -->
+      <!-- â•â• HEADER â•â• -->
       <tr>
         <td class="header-pad" style="background:#0D1F33; padding:30px 24px;
             text-align:center; border-bottom:2px solid #00D4FF;">
           <h1 class="logo-title" style="color:#00D4FF; margin:0; font-size:24px;
               font-family:Arial,sans-serif; font-weight:bold;">SmartTech Store</h1>
           <p style="color:#7A9BB5; margin:6px 0 0; font-size:12px;
-              letter-spacing:3px; font-family:Arial,sans-serif;">ACTUALIZACIÓN DE PEDIDO</p>
+              letter-spacing:3px; font-family:Arial,sans-serif;">ACTUALIZACIÃ“N DE PEDIDO</p>
         </td>
       </tr>
 
-      <!-- ══ CUERPO ══ -->
+      <!-- â•â• CUERPO â•â• -->
       <tr>
         <td class="body-pad" style="padding:28px 24px;">
 
@@ -353,12 +353,12 @@ def build_status_update(
         </td>
       </tr>
 
-      <!-- ══ FOOTER ══ -->
+      <!-- â•â• FOOTER â•â• -->
       <tr>
         <td class="footer-pad" align="center"
             style="background:#0D1F33; padding:20px 24px; border-top:1px solid #1A2E44;">
           <p style="color:#7A9BB5; font-size:11px; margin:0;
-              font-family:Arial,sans-serif;">SmartTech Store — Tu tienda de tecnología</p>
+              font-family:Arial,sans-serif;">SmartTech Store â€” Tu tienda de tecnologÃ­a</p>
         </td>
       </tr>
     """

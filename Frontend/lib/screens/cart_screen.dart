@@ -1,3 +1,4 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -18,7 +19,7 @@ class _CartScreenState extends State<CartScreen> {
   double totalPrice = 0;
   int totalItems = 0;
 
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = ApiConfig.baseUrl;
 
   static const _bg      = Color(0xFF060D17);
   static const _surface = Color(0xFF0D1F33);
@@ -118,7 +119,7 @@ class _CartScreenState extends State<CartScreen> {
     fetchCart();
   }
 
-  // ── Resumen antes de pagar ──
+  // â”€â”€ Resumen antes de pagar â”€â”€
   void _showOrderSummary(String token) {
     showModalBottomSheet(
       context: context,
@@ -168,7 +169,7 @@ class _CartScreenState extends State<CartScreen> {
                           Text(item['name'] ?? '',
                               style: const TextStyle(color: _textPri, fontWeight: FontWeight.w600, fontSize: 13),
                               overflow: TextOverflow.ellipsis),
-                          Text("x$qty  —  ${_fmtPrice(price)} c/u",
+                          Text("x$qty  â€”  ${_fmtPrice(price)} c/u",
                               style: const TextStyle(color: _textSec, fontSize: 11)),
                         ],
                       ),
@@ -190,7 +191,7 @@ class _CartScreenState extends State<CartScreen> {
             ),
             const SizedBox(height: 20),
 
-            // ── Botón Confirmar (MEJORADO) ──
+            // â”€â”€ BotÃ³n Confirmar (MEJORADO) â”€â”€
             Center(
               child: GestureDetector(
                 onTap: () {
@@ -277,10 +278,10 @@ class _CartScreenState extends State<CartScreen> {
                     child: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 28),
                   ),
                   const SizedBox(height: 16),
-                  const Text("¿Eliminar producto?",
+                  const Text("Â¿Eliminar producto?",
                       style: TextStyle(color: _textPri, fontWeight: FontWeight.w800, fontSize: 16)),
                   const SizedBox(height: 8),
-                  const Text("Se quitará del carrito",
+                  const Text("Se quitarÃ¡ del carrito",
                       style: TextStyle(color: _textSec, fontSize: 13)),
                   const SizedBox(height: 20),
                   Row(
@@ -377,7 +378,7 @@ class _CartScreenState extends State<CartScreen> {
                     const Text("AGOTADO",
                         style: TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w700))
                   else if (maxStock)
-                    Text("Límite: $stock uds",
+                    Text("LÃ­mite: $stock uds",
                         style: const TextStyle(color: Colors.orangeAccent, fontSize: 11))
                   else
                     Text("Stock: $stock",
@@ -460,7 +461,7 @@ class _CartScreenState extends State<CartScreen> {
                         child: Icon(Icons.shopping_cart_outlined, size: 52, color: _accent.withOpacity(0.5)),
                       ),
                       const SizedBox(height: 22),
-                      const Text("Carrito vacío",
+                      const Text("Carrito vacÃ­o",
                           style: TextStyle(color: _textPri, fontSize: 20, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 8),
                       const Text("Agrega productos para empezar",
@@ -507,12 +508,12 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   const SizedBox(height: 14),
 
-                  // ── Botón Finalizar (MEJORADO) ──
+                  // â”€â”€ BotÃ³n Finalizar (MEJORADO) â”€â”€
                   Center(
                     child: GestureDetector(
                       onTap: () async {
                         final token = await getToken();
-                        if (token == null) { showMessage("Token inválido", error: true); return; }
+                        if (token == null) { showMessage("Token invÃ¡lido", error: true); return; }
                         _showOrderSummary(token);
                       },
                       child: Container(

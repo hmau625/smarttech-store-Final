@@ -1,8 +1,9 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AdminService {
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = ApiConfig.baseUrl;
   final String token;
 
   AdminService({required this.token});
@@ -58,7 +59,7 @@ class AdminService {
     return res.statusCode == 200;
   }
 
-  // ── Reponer stock ──
+  // â”€â”€ Reponer stock â”€â”€
   Future<bool> restockProduct(int productId, int units) async {
     final res = await http.patch(
       Uri.parse("$baseUrl/admin/stock/$productId/restock"),

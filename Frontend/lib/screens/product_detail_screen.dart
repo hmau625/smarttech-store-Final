@@ -1,3 +1,4 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -26,7 +27,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool isAdmin = false;
   bool isDeleting = false;
 
-  // ── Reseñas ──
+  // â”€â”€ ReseÃ±as â”€â”€
   List<dynamic> reviews = [];
   bool loadingReviews = true;
   int? currentUserId;
@@ -44,7 +45,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   static const _textSec = Color(0xFF7A9BB5);
   static const _divider = Color(0xFF1A2E44);
 
-  final String _baseUrl = "http://localhost:8000";
+  final String _baseUrl = ApiConfig.baseUrl;
 
   @override
   void initState() {
@@ -60,7 +61,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     super.dispose();
   }
 
-  // ── Formato precio ────────────────────────────────────────────────────────
+  // â”€â”€ Formato precio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   String _formatPrice(dynamic raw) {
     if (raw == null) return '\$0';
     final value = (raw is num) ? raw.toDouble() : double.tryParse(raw.toString()) ?? 0.0;
@@ -91,7 +92,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  // ── Reseñas CRUD ──────────────────────────────────────────────────────────
+  // â”€â”€ ReseÃ±as CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> _loadReviews() async {
     try {
@@ -118,12 +119,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       );
       if (res.statusCode == 200) {
         _commentCtrl.clear(); _newRating = 0;
-        _msg("Reseña publicada"); _loadReviews();
+        _msg("ReseÃ±a publicada"); _loadReviews();
       } else {
         final data = jsonDecode(res.body);
         _msg(data['detail'] ?? "Error al publicar", true);
       }
-    } catch (_) { _msg("Error de conexión", true); }
+    } catch (_) { _msg("Error de conexiÃ³n", true); }
     setState(() => _submitting = false);
   }
 
@@ -140,7 +141,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         _replyCtrl.clear(); _replyingTo = null;
         _msg("Respuesta publicada"); _loadReviews();
       } else { _msg("Error al responder", true); }
-    } catch (_) { _msg("Error de conexión", true); }
+    } catch (_) { _msg("Error de conexiÃ³n", true); }
     setState(() => _submitting = false);
   }
 
@@ -150,8 +151,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       builder: (_) => AlertDialog(
         backgroundColor: _card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("¿Eliminar reseña?", style: TextStyle(color: _textPri)),
-        content: const Text("Esta acción no se puede deshacer", style: TextStyle(color: _textSec)),
+        title: const Text("Â¿Eliminar reseÃ±a?", style: TextStyle(color: _textPri)),
+        content: const Text("Esta acciÃ³n no se puede deshacer", style: TextStyle(color: _textSec)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false),
               child: const Text("Cancelar", style: TextStyle(color: _textSec))),
@@ -166,12 +167,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         Uri.parse("$_baseUrl/reviews/$reviewId"),
         headers: {"Authorization": "Bearer ${widget.token}"},
       );
-      if (res.statusCode == 200) { _msg("Reseña eliminada"); _loadReviews(); }
+      if (res.statusCode == 200) { _msg("ReseÃ±a eliminada"); _loadReviews(); }
       else { _msg("Error al eliminar", true); }
-    } catch (_) { _msg("Error de conexión", true); }
+    } catch (_) { _msg("Error de conexiÃ³n", true); }
   }
 
-  // ── Producto CRUD ─────────────────────────────────────────────────────────
+  // â”€â”€ Producto CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> addToCart(int productId) async {
     final url = Uri.parse("$_baseUrl/cart/add?product_id=$productId&token=${widget.token}");
@@ -183,7 +184,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (stock <= 0) { _msg("Sin stock", true); return; }
     if (quantity > stock) { _msg("Solo hay $stock disponibles", true); return; }
     for (int i = 0; i < quantity; i++) await addToCart(widget.product.id!);
-    _msg("Añadido al carrito");
+    _msg("AÃ±adido al carrito");
   }
 
   Future<void> deleteProduct() async {
@@ -198,7 +199,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         await Future.delayed(const Duration(milliseconds: 300));
         if (mounted) Navigator.pop(context);
       } else { _msg("Error al eliminar", true); }
-    } catch (e) { _msg("Error de conexión", true); }
+    } catch (e) { _msg("Error de conexiÃ³n", true); }
     setState(() => isDeleting = false);
   }
 
@@ -215,7 +216,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             const Text("Eliminar producto",
                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            const Text("Esta acción no se puede deshacer", style: TextStyle(color: Colors.grey)),
+            const Text("Esta acciÃ³n no se puede deshacer", style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 20),
             Row(children: [
               Expanded(child: TextButton(
@@ -242,7 +243,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Widgets base ──────────────────────────────────────────────────────────
+  // â”€â”€ Widgets base â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _section(Widget child) {
     return Container(
@@ -269,7 +270,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ]);
   }
 
-  // ── Estrellas ─────────────────────────────────────────────────────────────
+  // â”€â”€ Estrellas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _stars(double rating, {double size = 16, bool interactive = false, Function(double)? onTap}) {
     return Row(
@@ -300,7 +301,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Widget _ratingHeader() {
     if (reviews.isEmpty) {
-      return const Text("Sin reseñas aún", style: TextStyle(color: _textSec, fontSize: 13));
+      return const Text("Sin reseÃ±as aÃºn", style: TextStyle(color: _textSec, fontSize: 13));
     }
     final avg = reviews.fold<double>(0, (s, r) => s + (r['rating'] as num).toDouble()) / reviews.length;
     return Row(children: [
@@ -410,7 +411,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         : "${_newRating.toStringAsFixed(1)} de 5.0";
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text("Tu reseña", style: TextStyle(color: _textPri, fontWeight: FontWeight.w700, fontSize: 14)),
+      const Text("Tu reseÃ±a", style: TextStyle(color: _textPri, fontWeight: FontWeight.w700, fontSize: 14)),
       const SizedBox(height: 10),
       Row(children: [
         _stars(_newRating, size: 32, interactive: true, onTap: (v) => setState(() => _newRating = v)),
@@ -423,7 +424,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         maxLines: 3,
         style: const TextStyle(color: _textPri, fontSize: 13),
         decoration: InputDecoration(
-          hintText: "¿Qué opinas de este producto?",
+          hintText: "Â¿QuÃ© opinas de este producto?",
           hintStyle: TextStyle(color: _textSec.withOpacity(0.5), fontSize: 12),
           filled: true, fillColor: const Color(0xFF0A1929),
           contentPadding: const EdgeInsets.all(14),
@@ -444,7 +445,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: _submitting
                 ? const SizedBox(width: 18, height: 18,
                     child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
-                : const Text("Publicar reseña",
+                : const Text("Publicar reseÃ±a",
                     style: TextStyle(color: Colors.black, fontWeight: FontWeight.w800, fontSize: 14)),
           ),
         ),
@@ -452,7 +453,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     ]);
   }
 
-  // ── AppBar personalizado ──────────────────────────────────────────────────
+  // â”€â”€ AppBar personalizado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _buildAppBar() {
     return Container(
       color: _surface,
@@ -466,7 +467,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
               child: Row(
                 children: [
-                  // Logo → vuelve al list
+                  // Logo â†’ vuelve al list
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Row(children: [
@@ -508,7 +509,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ],
               ),
             ),
-            // Botón volver
+            // BotÃ³n volver
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -531,7 +532,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Footer ────────────────────────────────────────────────────────────────
+  // â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _buildFooter() {
     return Container(
       color: _bg,
@@ -546,9 +547,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: Row(children: [
               _footerStat("24/7", "Soporte IA"),
               _footerDiv(),
-              _footerStat("48h", "Envío express"),
+              _footerStat("48h", "EnvÃ­o express"),
               _footerDiv(),
-              _footerStat("100%", "Garantía"),
+              _footerStat("100%", "GarantÃ­a"),
               _footerDiv(),
               _footerStat("SSL", "Seguro"),
             ]),
@@ -585,9 +586,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 const SizedBox(width: 20),
                 _secItem(Icons.lock_outline, "SSL cifrado"),
                 const SizedBox(width: 20),
-                _secItem(Icons.local_shipping_outlined, "Envío garantizado"),
+                _secItem(Icons.local_shipping_outlined, "EnvÃ­o garantizado"),
                 const SizedBox(width: 20),
-                _secItem(Icons.replay_outlined, "Devolución fácil"),
+                _secItem(Icons.replay_outlined, "DevoluciÃ³n fÃ¡cil"),
                 const SizedBox(width: 20),
                 _secItem(Icons.verified_outlined, "Productos certificados"),
               ]),
@@ -601,7 +602,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               final isWide = constraints.maxWidth > 520;
               if (isWide) {
                 return Row(children: [
-                  const Text("© 2025 SmartTech Store · Todos los derechos reservados",
+                  const Text("Â© 2025 SmartTech Store Â· Todos los derechos reservados",
                       style: TextStyle(color: _textSec, fontSize: 10)),
                   const Spacer(),
                   _socialBtn(Icons.camera_alt_outlined),
@@ -624,7 +625,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   _socialBtn(Icons.chat_bubble_outline),
                 ]),
                 const SizedBox(height: 10),
-                const Text("© 2025 SmartTech Store · Todos los derechos reservados",
+                const Text("Â© 2025 SmartTech Store Â· Todos los derechos reservados",
                     style: TextStyle(color: _textSec, fontSize: 10)),
               ]);
             }),
@@ -649,10 +650,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       const Text("SMARTTECH STORE",
           style: TextStyle(color: _textSec, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600)),
       const SizedBox(height: 8),
-      const Text("Tu tienda de tecnología de confianza.",
+      const Text("Tu tienda de tecnologÃ­a de confianza.",
           style: TextStyle(color: _textSec, fontSize: 11, height: 1.5)),
       const SizedBox(height: 10),
-      _infoRow(Icons.location_on_outlined, "Colombia · Envíos a todo el país"),
+      _infoRow(Icons.location_on_outlined, "Colombia Â· EnvÃ­os a todo el paÃ­s"),
       const SizedBox(height: 4),
       _infoRow(Icons.mail_outline, "smart.tech6913@gmail.com"),
       const SizedBox(height: 4),
@@ -693,7 +694,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             Row(children: [
               Container(width: 5, height: 5, decoration: const BoxDecoration(color: Color(0xFF34D399), shape: BoxShape.circle)),
               const SizedBox(width: 4),
-              const Text("En línea ahora", style: TextStyle(color: Color(0xFF34D399), fontSize: 9, fontWeight: FontWeight.w600)),
+              const Text("En lÃ­nea ahora", style: TextStyle(color: Color(0xFF34D399), fontSize: 9, fontWeight: FontWeight.w600)),
             ]),
           ]),
         ]),
@@ -711,7 +712,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: const Color(0xFFA78BFA).withOpacity(0.35), width: 1),
             ),
-            child: const Text("Chatear con Nathalia ✦",
+            child: const Text("Chatear con Nathalia âœ¦",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Color(0xFFA78BFA), fontSize: 11, fontWeight: FontWeight.w700)),
           ),
@@ -740,7 +741,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── BUILD ─────────────────────────────────────────────────────────────────
+  // â”€â”€ BUILD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Widget build(BuildContext context) {
@@ -759,7 +760,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // ── Imagen con borde ────────────────────────────────────
+                  // â”€â”€ Imagen con borde â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: Container(
@@ -792,7 +793,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        // ── INFO ──────────────────────────────────────────
+                        // â”€â”€ INFO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _section(
                           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(product.name,
@@ -828,7 +829,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         const SizedBox(height: 12),
 
-                        // ── QUANTITY ──────────────────────────────────────
+                        // â”€â”€ QUANTITY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _section(
                           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                             const Text("Cantidad", style: TextStyle(color: _textPri, fontSize: 14)),
@@ -853,7 +854,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         const SizedBox(height: 12),
 
-                        // ── SPECS ─────────────────────────────────────────
+                        // â”€â”€ SPECS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         if (product.specs != null && product.specs!.isNotEmpty)
                           _section(
                             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -868,7 +869,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         const SizedBox(height: 16),
 
-                        // ── ADMIN BUTTONS ─────────────────────────────────
+                        // â”€â”€ ADMIN BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         if (isAdmin)
                           Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                             _actionBtn(
@@ -892,12 +893,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         if (isAdmin) const SizedBox(height: 12),
 
-                        // ── BOTONES ACCIÓN ────────────────────────────────
+                        // â”€â”€ BOTONES ACCIÃ“N â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                           // Carrito
                           _actionBtn(
                             icon: Icons.shopping_cart_rounded,
-                            label: "Añadir al carrito",
+                            label: "AÃ±adir al carrito",
                             color: _accent,
                             textColor: Colors.black,
                             onTap: addMultipleToCart,
@@ -914,21 +915,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             filled: false,
                             onTap: () => showNathaliaChat(
                               context, widget.token,
-                              initialMessage: "Háblame sobre el ${product.name} de ${product.brand ?? 'esta marca'}. "
-                                  "¿Vale la pena por \$${product.price}? ¿Qué opinan los usuarios?",
+                              initialMessage: "HÃ¡blame sobre el ${product.name} de ${product.brand ?? 'esta marca'}. "
+                                  "Â¿Vale la pena por \$${product.price}? Â¿QuÃ© opinan los usuarios?",
                             ),
                           ),
                         ]),
 
                         const SizedBox(height: 24),
 
-                        // ── RESEÑAS ───────────────────────────────────────
+                        // â”€â”€ RESEÃ‘AS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _section(
                           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Row(children: [
                               const Icon(Icons.rate_review_rounded, color: _accent, size: 20),
                               const SizedBox(width: 8),
-                              const Text("Reseñas",
+                              const Text("ReseÃ±as",
                                   style: TextStyle(color: _textPri, fontWeight: FontWeight.bold, fontSize: 16)),
                             ]),
                             const SizedBox(height: 12),
@@ -941,7 +942,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             else if (reviews.isEmpty)
                               const Center(child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 20),
-                                child: Text("Sé el primero en opinar",
+                                child: Text("SÃ© el primero en opinar",
                                     style: TextStyle(color: _textSec, fontSize: 13)),
                               ))
                             else
@@ -954,7 +955,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
 
-                  // ── FOOTER ───────────────────────────────────────────────
+                  // â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                   _buildFooter(),
                 ],
               ),
@@ -965,7 +966,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Botón cantidad ────────────────────────────────────────────────────────
+  // â”€â”€ BotÃ³n cantidad â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _qtyBtn(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -976,7 +977,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // ── Botón acción compacto ─────────────────────────────────────────────────
+  // â”€â”€ BotÃ³n acciÃ³n compacto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Widget _actionBtn({
     required IconData icon,
     required String label,

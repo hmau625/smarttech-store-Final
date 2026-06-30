@@ -1,8 +1,9 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ProductService {
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = ApiConfig.baseUrl;
 
   Future<List<dynamic>> getProducts() async {
     final response = await http.get(

@@ -1,3 +1,4 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +14,7 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   List _orders = [];
   bool _loading = true;
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = ApiConfig.baseUrl;
 
   static const _bg      = Color(0xFF060D17);
   static const _surface = Color(0xFF0D1F33);
@@ -54,7 +55,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
-  // ── colores y labels de estado ──
+  // â”€â”€ colores y labels de estado â”€â”€
   Color _statusColor(String s) {
     switch (s) {
       case "pagado":         return const Color(0xFF00D4FF);
@@ -69,7 +70,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   String _statusLabel(String s) {
     switch (s) {
       case "pagado":         return "Pagado";
-      case "en_preparacion": return "En preparación";
+      case "en_preparacion": return "En preparaciÃ³n";
       case "enviado":        return "En camino";
       case "entregado":      return "Entregado";
       case "cancelado":      return "Cancelado";
@@ -91,10 +92,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
   String _statusMessage(String s) {
     switch (s) {
       case "pagado":         return "Tu pago fue confirmado. Pronto empezaremos a preparar tu pedido.";
-      case "en_preparacion": return "Estamos preparando tu pedido con cuidado. ¡Ya casi está listo!";
-      case "enviado":        return "Tu pedido está en camino. El transportista lo entregará pronto.";
-      case "entregado":      return "¡Tu pedido llegó! Esperamos que disfrutes tu compra.";
-      case "cancelado":      return "Este pedido fue cancelado. Contáctanos si tienes dudas.";
+      case "en_preparacion": return "Estamos preparando tu pedido con cuidado. Â¡Ya casi estÃ¡ listo!";
+      case "enviado":        return "Tu pedido estÃ¡ en camino. El transportista lo entregarÃ¡ pronto.";
+      case "entregado":      return "Â¡Tu pedido llegÃ³! Esperamos que disfrutes tu compra.";
+      case "cancelado":      return "Este pedido fue cancelado. ContÃ¡ctanos si tienes dudas.";
       default:               return "";
     }
   }
@@ -142,7 +143,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── Header ──
+              // â”€â”€ Header â”€â”€
               Row(
                 children: [
                   Container(
@@ -167,7 +168,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── Stepper ──
+              // â”€â”€ Stepper â”€â”€
               if (!isCancelado)
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -214,7 +215,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
               const SizedBox(height: 12),
 
-              // ── Mensaje estado ──
+              // â”€â”€ Mensaje estado â”€â”€
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -233,7 +234,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── Info pedido ──
+              // â”€â”€ Info pedido â”€â”€
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -242,7 +243,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 ),
                 child: Column(
                   children: [
-                    _infoRow("Método de pago", order['payment_method'] ?? ''),
+                    _infoRow("MÃ©todo de pago", order['payment_method'] ?? ''),
                     _infoRow("Fecha", _formatDate(order['created_at'] ?? '')),
                     _infoRow("Total", _fmtPrice(order['total_price'])),
                   ],
@@ -250,7 +251,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── Productos ──
+              // â”€â”€ Productos â”€â”€
               Text("Productos (${items.length})",
                   style: const TextStyle(color: _textPri, fontWeight: FontWeight.w700, fontSize: 14)),
               const SizedBox(height: 10),
@@ -277,7 +278,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         children: [
                           Text(item['product_name'] ?? '',
                               style: const TextStyle(color: _textPri, fontWeight: FontWeight.w600, fontSize: 13)),
-                          Text("x${item['quantity']}  —  ${_fmtPrice(item['price'])} c/u",
+                          Text("x${item['quantity']}  â€”  ${_fmtPrice(item['price'])} c/u",
                               style: const TextStyle(color: _textSec, fontSize: 11)),
                         ],
                       ),
@@ -290,7 +291,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
               const SizedBox(height: 16),
 
-              // ── Recomendaciones ──
+              // â”€â”€ Recomendaciones â”€â”€
               if (status == "entregado") ...[
                 Container(
                   padding: const EdgeInsets.all(14),
@@ -308,8 +309,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         Text("Recomendaciones", style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.w700, fontSize: 14)),
                       ]),
                       const SizedBox(height: 10),
-                      _recomRow(Icons.replay_rounded,        "¿Te gustó? Vuelve a comprar en SmartTech"),
-                      _recomRow(Icons.support_agent_rounded, "¿Algún problema? Contáctanos"),
+                      _recomRow(Icons.replay_rounded,        "Â¿Te gustÃ³? Vuelve a comprar en SmartTech"),
+                      _recomRow(Icons.support_agent_rounded, "Â¿AlgÃºn problema? ContÃ¡ctanos"),
                       _recomRow(Icons.share_rounded,         "Comparte tu experiencia con amigos"),
                     ],
                   ),
@@ -333,8 +334,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         Text("Consejos", style: TextStyle(color: Color(0xFFAB47BC), fontWeight: FontWeight.w700, fontSize: 14)),
                       ]),
                       const SizedBox(height: 10),
-                      _recomRow(Icons.home_rounded,          "Asegúrate de estar en casa al momento de la entrega"),
-                      _recomRow(Icons.phone_rounded,         "Ten tu número de contacto disponible"),
+                      _recomRow(Icons.home_rounded,          "AsegÃºrate de estar en casa al momento de la entrega"),
+                      _recomRow(Icons.phone_rounded,         "Ten tu nÃºmero de contacto disponible"),
                       _recomRow(Icons.inventory_rounded,     "Revisa el paquete antes de firmar"),
                     ],
                   ),
@@ -419,10 +420,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         child: Icon(Icons.receipt_long_outlined, size: 48, color: _accent.withOpacity(0.5)),
                       ),
                       const SizedBox(height: 20),
-                      const Text("Sin compras aún",
+                      const Text("Sin compras aÃºn",
                           style: TextStyle(color: _textPri, fontSize: 18, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 8),
-                      const Text("Tus pedidos aparecerán aquí",
+                      const Text("Tus pedidos aparecerÃ¡n aquÃ­",
                           style: TextStyle(color: _textSec, fontSize: 13)),
                     ],
                   ),
@@ -451,7 +452,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           ),
                           child: Column(
                             children: [
-                              // ── Header card ──
+                              // â”€â”€ Header card â”€â”€
                               Padding(
                                 padding: const EdgeInsets.all(14),
                                 child: Row(
@@ -499,7 +500,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 ),
                               ),
 
-                              // ── Mini productos ──
+                              // â”€â”€ Mini productos â”€â”€
                               if (items.isNotEmpty) ...[
                                 Divider(color: _divider, height: 1),
                                 Padding(
@@ -532,7 +533,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                         child: Text(
                                           items.length == 1
                                               ? items[0]['product_name']
-                                              : "${items[0]['product_name']} y ${items.length - 1} más",
+                                              : "${items[0]['product_name']} y ${items.length - 1} mÃ¡s",
                                           style: const TextStyle(color: _textSec, fontSize: 12),
                                           overflow: TextOverflow.ellipsis,
                                         ),

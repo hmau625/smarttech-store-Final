@@ -1,9 +1,10 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 class UserService {
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = ApiConfig.baseUrl;
 
   // ================= GET USER =================
   Future<Map<String, dynamic>?> getMe(String token) async {
@@ -72,7 +73,7 @@ class UserService {
 
         final data = jsonDecode(respStr);
 
-        // 🔥 devuelve la URL de la imagen
+        // ðŸ”¥ devuelve la URL de la imagen
         return data['url'];
       } else {
         print("ERROR UPLOAD: ${response.statusCode}");

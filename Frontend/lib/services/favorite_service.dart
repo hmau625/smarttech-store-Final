@@ -1,8 +1,9 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class FavoriteService {
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = ApiConfig.baseUrl;
 
   Future<bool> addFavorite(String token, int productId) async {
     final res = await http.post(
@@ -12,7 +13,7 @@ class FavoriteService {
       },
     );
 
-    print('>>> POST favorites/$productId → status: ${res.statusCode} | body: ${res.body}');
+    print('>>> POST favorites/$productId â†’ status: ${res.statusCode} | body: ${res.body}');
     return res.statusCode == 200 || res.statusCode == 201;
   }
 
@@ -24,10 +25,10 @@ class FavoriteService {
       },
     );
 
-    // 🔍 TEMPORAL: ver qué responde el servidor exactamente
-    print('>>> DELETE favorites/$productId → status: ${res.statusCode} | body: ${res.body}');
+    // ðŸ” TEMPORAL: ver quÃ© responde el servidor exactamente
+    print('>>> DELETE favorites/$productId â†’ status: ${res.statusCode} | body: ${res.body}');
 
-    // Acepta cualquier código 2xx como éxito
+    // Acepta cualquier cÃ³digo 2xx como Ã©xito
     return res.statusCode >= 200 && res.statusCode < 300;
   }
 
@@ -39,7 +40,7 @@ class FavoriteService {
       },
     );
 
-    print('>>> GET favorites → status: ${res.statusCode}');
+    print('>>> GET favorites â†’ status: ${res.statusCode}');
 
     if (res.statusCode == 200) {
       return jsonDecode(res.body);

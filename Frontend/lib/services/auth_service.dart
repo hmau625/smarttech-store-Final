@@ -1,8 +1,9 @@
+﻿import 'package:smarttech_store/config/api_config.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  final String baseUrl = "http://localhost:8000"; // 🔥 WEB
+  final String baseUrl = ApiConfig.baseUrl;
 
   Future<Map<String, dynamic>> login(String correo, String password) async {
   final url = Uri.parse("$baseUrl/auth/login");
@@ -35,7 +36,7 @@ class AuthService {
     };
   }
 }
-  // 🔥 REGISTER (ESTO ES LO QUE TE FALTA O ESTÁ MAL)
+  // ðŸ”¥ REGISTER (ESTO ES LO QUE TE FALTA O ESTÃ MAL)
   Future<Map<String, dynamic>> register(
     String nombre, String correo, String password) async {
 
