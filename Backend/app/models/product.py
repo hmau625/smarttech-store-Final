@@ -12,4 +12,4 @@ class Product(Base):
     stock = Column(Integer, default=0)
     image = Column(String(500))
     specs = Column(JSON)
-    status = Column(String, default="active")
+    status = Column(String(20), default="active")
