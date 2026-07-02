@@ -13,10 +13,22 @@ if not DATABASE_URL:
         "Crea un archivo .env (ver .env.example) o configuralo en Railway."
     )
 
-engine = create_engine(
-    DATABASE_URL,
-    echo=False
-)
+print(f"🔌 DATABASE_URL: {DATABASE_URL}")  # Debug
+
+try:
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,  # Verifica conexión antes de usar
+        pool_recycle=3600,   # Recicla conexiones cada hora
+    )
+    
+    # Prueba la conexión
+    with engine.connect() as conn:
+        print("✅ Conexión a BD exitosa")
+except Exception as e:
+    print(f"❌ Error de conexión: {e}")
+    raise
 
 SessionLocal = sessionmaker(
     autocommit=False,
