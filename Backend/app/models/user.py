@@ -10,4 +10,4 @@ class User(Base):
     contraseña = Column(String(255), nullable=False)
     rol = Column(Enum("admin", "cliente"), default="cliente")
     activo = Column(Boolean, default=True)
-    imagen = Column(String, nullable=True)
+    imagen = Column(String(255), nullable=True)
